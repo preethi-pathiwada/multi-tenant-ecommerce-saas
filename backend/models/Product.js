@@ -28,7 +28,25 @@ const productSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"Store",
         required:true
-    }
+    },
+    variants:[
+        {
+            name:{
+                type:String,
+                required: true
+            },
+            price:{
+                type:Number,
+                required: true,
+                min:0
+            },
+            stock:{
+                type:Number,
+                required: true,
+                min:0
+            }
+        }
+       ]
 
 }, {timeStamps:true});
 
