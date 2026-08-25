@@ -48,7 +48,7 @@ const StorePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="mb-6 text-3xl font-bold">
+      <h1 className="mb-6 text-3xl font-bold text-center">
         {store.name}
       </h1>
 

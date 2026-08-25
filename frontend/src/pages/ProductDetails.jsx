@@ -1,10 +1,16 @@
 
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+
 import api from "../services/api";
+import { addToCart } from "../store/cartSlice";
+
 
 const ProductDetails = () => {
   const { productId } = useParams();
+  const dispatch = useDispatch();
+  
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,7 +43,7 @@ const ProductDetails = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="mx-auto max-w-3xl rounded-lg bg-white p-6 shadow">
+      <div className="mx-auto max-w-3xl rounded-lg bg-white p-6 shadow ">
         <h1 className="text-3xl font-bold">
           {product.name}
         </h1>
@@ -60,7 +66,7 @@ const ProductDetails = () => {
               Available Options
             </h2>
 
-            <div className="flex gap-3">
+            <div className="flex justify-center gap-3">
               {product.variants.map((variant) => (
                 <div
                   key={variant._id}
@@ -80,6 +86,26 @@ const ProductDetails = () => {
             </div>
           </div>
         )}
+        <button
+            onClick={() => {
+                dispatch(
+                addToCart({
+                    productId: product._id,
+                    variantId: null,
+                    name: product.name,
+                    variantName: null,
+                    price: product.price,
+                })
+                )
+                
+            }
+                
+            }
+            className="mt-6 rounded bg-black px-6 py-3 text-white"
+            >
+            Add to Cart
+        </button>
+        <Link to={"/cart"}><button className="bg-blue-400 rounded-md px-4 py-2 text-white">Go to cart</button></Link>
       </div>
     </div>
   );
