@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 import Store from "../models/Store.js"
 import Product from "../models/Product.js"
 
@@ -200,6 +202,39 @@ export const deleteProduct = async (req, res) => {
       message:"Failed to delete the product",
       error: error.message
     })
+  }
+};
+
+
+export const getProductById = async (req, res) => {
+  try{
+    const {productId} = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({
+        message: "Invalid product ID format",
+      });
+    }
+
+    const product = await Product.findById(productId);
+    console.log(product);
+
+    if(!product){
+      return res.status(404).json({
+        message:"Product not found"
+      })
+    }
+
+    res.status(200).json({
+      message:"",
+      product
+    })
+  }
+  catch(error){
+    res.status(500).json({
+      message: "Failed to get product",
+      error: error.message,
+    });
   }
 };
 
