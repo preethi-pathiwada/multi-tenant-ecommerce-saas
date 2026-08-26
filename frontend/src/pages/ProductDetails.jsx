@@ -14,6 +14,8 @@ const ProductDetails = () => {
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedVariant, setSelectedVariant] = useState(null);
+ 
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -32,6 +34,8 @@ const ProductDetails = () => {
 
     fetchProduct();
   }, [productId]);
+
+  
 
   if (loading) {
     return <p className="p-6">Loading product...</p>;
@@ -68,9 +72,10 @@ const ProductDetails = () => {
 
             <div className="flex justify-center gap-3">
               {product.variants.map((variant) => (
-                <div
+                <button
                   key={variant._id}
-                  className="rounded border p-3"
+                  className= {`rounded px-4 py-2 ${selectedVariant?._id === variant._id ? "bg-black text-white": "bg-white"}`}
+                  onClick={() => setSelectedVariant(variant)}
                 >
                   <p className="font-medium">
                     {variant.name}
@@ -81,31 +86,36 @@ const ProductDetails = () => {
                   <p className="text-sm text-gray-500">
                     Stock: {variant.stock}
                   </p>
-                </div>
+                </button>
               ))}
             </div>
           </div>
         )}
         <button
             onClick={() => {
+              if (product.variants?.length > 0 && !selectedVariant){
+                alert("Please select the size");
+                return;
+              }
                 dispatch(
                 addToCart({
                     productId: product._id,
-                    variantId: null,
+                    variantId: selectedVariant?._id || null,
                     name: product.name,
-                    variantName: null,
-                    price: product.price,
+                    variantName: selectedVariant?.name || null,
+                    price: selectedVariant?.price || null,
+                    store: product.store
                 })
                 )
                 
             }
                 
             }
-            className="mt-6 rounded bg-black px-6 py-3 text-white"
+            className="mt-6 rounded bg-black px-6 py-3 text-white cursor-pointer active:bg-blue-500"
             >
             Add to Cart
         </button>
-        <Link to={"/cart"}><button className="bg-blue-400 rounded-md px-4 py-2 text-white">Go to cart</button></Link>
+        <Link to={"/cart"}><button className="bg-blue-400 rounded-md px-6 py-3 ml-4 text-white cursor-pointer">Go to cart</button></Link>
       </div>
     </div>
   );

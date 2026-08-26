@@ -1,8 +1,10 @@
 import { useDispatch, useSelector } from "react-redux";
 import { removeFromCart, clearCart,increaseQuantity, decreaseQuantity} from "../store/cartSlice";
+import { useNavigate } from "react-router-dom";
 
 const CartPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const cartItems = useSelector(
     (state) => state.cart.items
@@ -101,6 +103,12 @@ const CartPage = () => {
           className="mt-4 rounded bg-black px-5 py-2 text-white"
         >
           Clear Cart
+        </button>
+        <button
+          onClick={() => navigate("/checkout")}
+          className="mt-4 w-full rounded bg-black px-5 py-3 text-white"
+        >
+          Proceed to Checkout
         </button>
       </div>
     </div>
