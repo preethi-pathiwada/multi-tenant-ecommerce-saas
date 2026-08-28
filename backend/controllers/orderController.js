@@ -1,5 +1,6 @@
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
+import razorpay from "../config/razorpay.js";
 
 //{customer, store, items:[{productId, variantId, name, price, quantity}], totalAmount, shippingAddress:{name, phone, address, city, state, pincode}, status, paymentStatus}
 
@@ -82,6 +83,53 @@ export const createOrder = async (req, res) => {
       message: "Failed to create order",
       error: error.message,
     });
+  }
+};
+
+export const createRazorpayOrder = async (req, res) => {
+  try{
+    const {orderId} = req.body;
+
+    const order = await Order.findById(orderId);
+    
+    if(!order){
+      return res.json(404).json({
+        message:"Order not Found"
+      })
+    }
+
+    // console.log(order.customer, req.user._id)
+
+    if (order.customer.toString() !== req.user._id.toString()){
+      return res.status(403).json({
+        message:"You are not allowed to pay"
+      })
+    }
+
+    const razorpayOrder = await razorpay.orders.create({
+      amount: Math.round(order.totalAmount*100),
+      currency:"INR",
+      receipt: order._id.toString()
+    })
+
+    order.razorpayId = razorpayOrder.id;
+
+    await order.save();
+
+    res.status(200).json({
+      message:"Razorpay Order created successfully",
+      razorpayOrderId: razorpayOrder.id,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency
+    })
+
+  }
+  
+  catch(error){
+    res.status(500).json({
+      message:"Failed to create the razorpay order",
+      error: error.message
+    })
   }
 };
 
