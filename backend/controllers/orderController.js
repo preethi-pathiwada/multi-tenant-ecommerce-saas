@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import razorpay from "../config/razorpay.js";
@@ -88,49 +90,105 @@ export const createOrder = async (req, res) => {
 
 
 export const createRazorpayOrder = async (req, res) => {
-  try{
-    const {orderId} = req.body;
+  try {
+    const { orderId } = req.body;
 
     const order = await Order.findById(orderId);
-    
-    if(!order){
-      return res.json(404).json({
-        message:"Order not Found"
-      })
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+      });
     }
 
-    // console.log(order.customer, req.user._id)
-
-    if (order.customer.toString() !== req.user._id.toString()){
+    if (order.customer.toString() !== req.user._id.toString()) {
       return res.status(403).json({
-        message:"You are not allowed to pay"
-      })
+        message: "You are not allowed to pay for this order",
+      });
     }
 
     const razorpayOrder = await razorpay.orders.create({
-      amount: Math.round(order.totalAmount*100),
-      currency:"INR",
-      receipt: order._id.toString()
-    })
+      amount: Math.round(order.totalAmount * 100),
+      currency: "INR",
+      receipt: order._id.toString(),
+    });
 
-    order.razorpayId = razorpayOrder.id;
+    order.razorpayOrderId = razorpayOrder.id;
+
+    await order.save();
+
+    console.log(order);
+
+    res.status(200).json({
+      message: "Razorpay order created",
+      razorpayOrderId: razorpayOrder.id,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to create Razorpay order",
+      error: error.message,
+    });
+  }
+};
+
+export const verifyRazorpayPayment = async (req, res) => {
+  try {
+  
+    const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
+
+    console.log(req.body);
+    const order = await Order.findOne({
+      razorpayOrderId: razorpay_order_id,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+      });
+    }
+
+    if (
+      order.customer.toString() !==
+      req.user._id.toString()
+    ) {
+      return res.status(403).json({
+        message: "You are not allowed to verify this order",
+      });
+    }
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+    const expectedSignature = crypto
+      .createHmac(
+        "sha256",
+        process.env.RAZORPAY_KEY_SECRET
+      )
+      .update(body)
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.status(400).json({
+        message: "Invalid payment signature",
+      });
+    }
+
+    order.razorpayPaymentId = razorpay_payment_id;
+
+    order.paymentStatus = "PAID";
+    order.status = "CONFIRMED";
 
     await order.save();
 
     res.status(200).json({
-      message:"Razorpay Order created successfully",
-      razorpayOrderId: razorpayOrder.id,
-      amount: razorpayOrder.amount,
-      currency: razorpayOrder.currency
-    })
-
-  }
-  
-  catch(error){
+      message: "Payment verified successfully",
+    });
+  } catch (error) {
     res.status(500).json({
-      message:"Failed to create the razorpay order",
-      error: error.message
-    })
+      message: "Payment verification failed",
+      error: error.message,
+    });
   }
 };
 

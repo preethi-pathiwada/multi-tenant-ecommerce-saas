@@ -79,10 +79,14 @@ const CheckoutPage = () => {
         return;
       }
 
-      const razorpayResponse = await api.post("/orders/payment/create", {orderId: "6a90632950df2f19b733f9e5"}, 
+      const razorpayResponse = await api.post("/orders/payment/create", {orderId: createdOrder._id}, 
         {headers:
           {
-            Authorization:"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YThlYTBmMGQ1NmZmNTlmZDY2ZWE3YTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3ODc3MzIyNjksImV4cCI6MTc4ODMzNzA2OX0.aky4mj01VMqmBY6w0YKUEZFeOWQQBYJBXFceGaryTsI"}})
+            Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YThlYTBmMGQ1NmZmNTlmZDY2ZWE3YTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3ODc3MzIyNjksImV4cCI6MTc4ODMzNzA2OX0.aky4mj01VMqmBY6w0YKUEZFeOWQQBYJBXFceGaryTsI"
+          }
+        }
+        )
 
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -97,8 +101,39 @@ const CheckoutPage = () => {
 
         order_id: razorpayResponse.data.razorpayOrderId,
 
-        handler: function (paymentResponse) {
-          console.log("Payment Response:", paymentResponse);
+        // handler: function (paymentResponse) {
+        //   console.log("Payment Response:", paymentResponse);
+        // },
+        handler: async function(paymentResponse) {
+          console.log("Payment details are ", paymentResponse)
+          try {
+
+            await api.post("/orders/payment/verify", {
+              razorpay_order_id: paymentResponse.razorpay_order_id,
+              razorpay_payment_id: paymentResponse.razorpay_payment_id,
+              razorpay_signature: paymentResponse.razorpay_signature,
+            }, 
+            {headers:
+              {
+                Authorization:
+                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YThlYTBmMGQ1NmZmNTlmZDY2ZWE3YTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3ODc3MzIyNjksImV4cCI6MTc4ODMzNzA2OX0.aky4mj01VMqmBY6w0YKUEZFeOWQQBYJBXFceGaryTsI"
+              }
+            }
+          );
+
+            dispatch(clearCart());
+
+            navigate("/order-success");
+          } 
+          
+          catch (error) {
+            console.error(error);
+
+            alert(
+              error.response?.data?.message ||
+                "Payment verification failed"
+            );
+            }
         },
 
         prefill: {
