@@ -2,8 +2,30 @@ import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
+
 import api from "../services/api";
 import { clearCart } from "../store/cartSlice";
+
+
+const loadRazorpay = () => {
+
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    
+    script.onload = () => {
+      resolve(true);
+    }
+    
+    script.onerror = () => {
+      resolve(false);
+    }
+    
+    document.body.appendChild(script);
+  })
+
+};
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -40,13 +62,58 @@ const CheckoutPage = () => {
         quantity: item.quantity,
       }));
 
-      const response = await api.post("/orders", {
-        store: storeId,
-        items,
-        shippingAddress: form,
-      }, {headers:{Authorization:"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YThlYTBmMGQ1NmZmNTlmZDY2ZWE3YTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3ODc3MzIyNjksImV4cCI6MTc4ODMzNzA2OX0.aky4mj01VMqmBY6w0YKUEZFeOWQQBYJBXFceGaryTsI"}});
 
+      const response = await api.post("/orders",
+        {store: storeId, items, shippingAddress: form},
+        {headers:{Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YThlYTBmMGQ1NmZmNTlmZDY2ZWE3YTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3ODc3MzIyNjksImV4cCI6MTc4ODMzNzA2OX0.aky4mj01VMqmBY6w0YKUEZFeOWQQBYJBXFceGaryTsI"}}
+      );
+       
       console.log(response.data);
+
+      const createdOrder = response.data.order;
+
+      const loaded = await loadRazorpay();
+
+      if (!loaded) {
+        alert("Razorpay failed to load");
+        return;
+      }
+
+      const razorpayResponse = await api.post("/orders/payment/create", {orderId: "6a90632950df2f19b733f9e5"}, 
+        {headers:
+          {
+            Authorization:"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YThlYTBmMGQ1NmZmNTlmZDY2ZWE3YTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3ODc3MzIyNjksImV4cCI6MTc4ODMzNzA2OX0.aky4mj01VMqmBY6w0YKUEZFeOWQQBYJBXFceGaryTsI"}})
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+
+        amount: razorpayResponse.data.amount,
+
+        currency: razorpayResponse.data.currency,
+
+        name: "Preethi's Fashion",
+
+        description: "E-Commerce Purchase",
+
+        order_id: razorpayResponse.data.razorpayOrderId,
+
+        handler: function (paymentResponse) {
+          console.log("Payment Response:", paymentResponse);
+        },
+
+        prefill: {
+          name: form.name,
+          contact: form.phone,
+        },
+
+        theme: {
+          color: "#000000",
+        },
+    };
+
+    const razorpay = new window.Razorpay(options);
+
+    razorpay.open();
 
       dispatch(clearCart());
       navigate("/order-success");
