@@ -64,8 +64,7 @@ const CheckoutPage = () => {
 
 
       const response = await api.post("/orders",
-        {store: storeId, items, shippingAddress: form},
-        {headers:{Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YThlYTBmMGQ1NmZmNTlmZDY2ZWE3YTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3ODc3MzIyNjksImV4cCI6MTc4ODMzNzA2OX0.aky4mj01VMqmBY6w0YKUEZFeOWQQBYJBXFceGaryTsI"}}
+        {store: storeId, items, shippingAddress: form}, {headers:{Authorization:`Bearer ${import.meta.env.VITE_CUSTOMER_JWT_TOKEN}`}}
       );
        
       console.log(response.data);
@@ -80,12 +79,7 @@ const CheckoutPage = () => {
       }
 
       const razorpayResponse = await api.post("/orders/payment/create", {orderId: createdOrder._id}, 
-        {headers:
-          {
-            Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YThlYTBmMGQ1NmZmNTlmZDY2ZWE3YTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3ODc3MzIyNjksImV4cCI6MTc4ODMzNzA2OX0.aky4mj01VMqmBY6w0YKUEZFeOWQQBYJBXFceGaryTsI"
-          }
-        }
+        {headers:{Authorization:`Bearer ${import.meta.env.VITE_CUSTOMER_JWT_TOKEN}`}}
         )
 
       const options = {
@@ -113,12 +107,7 @@ const CheckoutPage = () => {
               razorpay_payment_id: paymentResponse.razorpay_payment_id,
               razorpay_signature: paymentResponse.razorpay_signature,
             }, 
-            {headers:
-              {
-                Authorization:
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YThlYTBmMGQ1NmZmNTlmZDY2ZWE3YTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3ODc3MzIyNjksImV4cCI6MTc4ODMzNzA2OX0.aky4mj01VMqmBY6w0YKUEZFeOWQQBYJBXFceGaryTsI"
-              }
-            }
+            {headers:{Authorization:`Bearer ${import.meta.env.VITE_CUSTOMER_JWT_TOKEN}`}}
           );
 
             dispatch(clearCart());
