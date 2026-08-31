@@ -68,7 +68,13 @@ const VendorDashboard = () => {
             className="mt-6 rounded bg-black px-5 py-3 text-white"
             >
             Manage Products
-            </button>
+        </button>
+        <button
+            onClick={() => navigate("/vendor/store")}
+            className="mt-4 rounded border px-5 py-3"
+            >
+            My Store
+        </button>
         </div>
     );
 };

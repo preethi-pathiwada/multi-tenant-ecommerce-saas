@@ -10,6 +10,8 @@ import VendorDashboard from "./pages/vendor/VendorDashboard";
 import VendorProducts from "./pages/vendor/VendorProducts";
 import AddProduct from "./pages/vendor/AddProduct";
 import EditProduct from "./pages/vendor/EditProduct";
+import MyStore from "./pages/vendor/MyStore";
+import EditStore from "./pages/vendor/EditStore";
 
 
 
@@ -26,6 +28,8 @@ const App = () => {
         <Route path={"/vendor/products"} element = {<VendorProducts/>}/>
         <Route path="/vendor/products/new" element = {<AddProduct/>}/>
         <Route path="/vendor/products/edit/:id" element={<EditProduct/>}/>
+        <Route path="/vendor/store" element={<MyStore/>}/>
+        <Route path="/vendor/store/edit" element={<EditStore/>}/>
       </Routes>
   )
 }
