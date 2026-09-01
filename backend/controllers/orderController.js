@@ -1,6 +1,7 @@
 import crypto from "crypto";
 
 import Order from "../models/Order.js";
+import Store from "../models/Store.js";
 import Product from "../models/Product.js";
 import razorpay from "../config/razorpay.js";
 
@@ -188,6 +189,37 @@ export const verifyRazorpayPayment = async (req, res) => {
     res.status(500).json({
       message: "Payment verification failed",
       error: error.message,
+    });
+  }
+};
+
+
+//Need to implement webhook logic here which I'll later after the backend deployment
+
+export const getVendorOrders = async (req, res) => {
+  try {
+    const store = await Store.findOne({owner: req.user._id,});
+
+    if (!store) {
+      return res.status(404).json({
+        message: "Store not found",
+      });
+    }
+
+    const orders = await Order.find({
+      store: store._id,
+    })
+      .populate("customer", "name email")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      orders,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch vendor orders",
     });
   }
 };

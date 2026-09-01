@@ -2,7 +2,7 @@ import Store from "../models/Store.js";
 
 export const createStore = async (req, res) => {
   try {
-    const { name, slug } = req.body;
+    const { name, description, slug,  } = req.body;
 
 
     if (!name || !slug) {
@@ -36,6 +36,7 @@ export const createStore = async (req, res) => {
     
     const store = await Store.create({
       name,
+      description,
       slug: slug.toLowerCase(),
       owner: req.user._id,
     });
@@ -100,3 +101,25 @@ export const getStoreBySlug = async (req, res) => {
     });
   }
 };
+
+export const editStore = async (req, res) => {
+
+  const {name, description} = req.body;
+
+  const store = await Store.findOne({owner: req.user._id});
+
+  if(!store) {
+    return res.status(404).json({message:"Store Not Found"});
+  }
+  // console.log("STORE IS", store);
+
+  store.name = name,
+  store.description = description
+
+  await store.save();
+
+  res.status(200).json({
+    message:"Store updated successfully",
+    store
+  })
+}
