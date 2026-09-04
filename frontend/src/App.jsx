@@ -13,6 +13,7 @@ import EditProduct from "./pages/vendor/EditProduct";
 import MyStore from "./pages/vendor/MyStore";
 import EditStore from "./pages/vendor/EditStore";
 import VendorOrders from "./pages/vendor/VendorOrders";
+import MyOrders from "./pages/customer/MyOrders";
 
 
 
@@ -32,6 +33,7 @@ const App = () => {
         <Route path="/vendor/store" element={<MyStore/>}/>
         <Route path="/vendor/store/edit" element={<EditStore/>}/>
         <Route path="/vendor/orders" element={<VendorOrders/>}/>
+        <Route path="/my-orders" element={<MyOrders/>}/>
       </Routes>
   )
 }
