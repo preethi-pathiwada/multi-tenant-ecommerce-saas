@@ -21,9 +21,7 @@ const StorePage = () => {
 
         setStore(storeData);
 
-        const productResponse = await api.get(
-          `/products/store/${storeData._id}`
-        );
+        const productResponse = await api.get(`/products/store/${storeData._id}`);
 
         // console.log(productResponse);
 

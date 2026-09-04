@@ -20,12 +20,11 @@ const ProductDetails = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await api.get(
-          `/products/${productId}`
-        );
+        const response = await api.get(`/products/${productId}`);
 
         setProduct(response.data.product);
-      } catch (error) {
+      } 
+      catch (error) {
         console.error(error);
       } finally {
         setLoading(false);

@@ -87,27 +87,27 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    const token = jwt.sign(
-      {
-        userId: user._id,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
-    );
+    const token = jwt.sign({userId: user._id, role: user.role}, process.env.JWT_SECRET, {expiresIn: "7d"});
 
-    res.status(200).json({
-      message: "Login successful",
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-    });
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax", //strict 
+      maxAge: 24*60*60*1000
+    })
+
+    res.status(200).json({message:"Login Successful", user:{id: user._id, name: user.name, email: user.email, role: user.role}})
+
+    // res.status(200).json({
+    //   message: "Login successful",
+    //   token,
+    //   user: {
+    //     id: user._id,
+    //     name: user.name,
+    //     email: user.email,
+    //     role: user.role,
+    //   },
+    // });
   } catch (error) {
     res.status(500).json({
       message: "Login failed",

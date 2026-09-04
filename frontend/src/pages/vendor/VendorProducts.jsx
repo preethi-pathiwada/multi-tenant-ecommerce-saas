@@ -9,7 +9,7 @@ const VendorProducts = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await api.get("/products/my-store", {headers:{Authorization:`Bearer ${import.meta.env.VITE_VENDOR_JWT_TOKEN}`}});
+      const response = await api.get("/products/my-store");
 
       setProducts(response.data.products);
     } catch (error) {
@@ -29,7 +29,7 @@ const VendorProducts = () => {
     if (!confirmed) return;
 
     try {
-      await api.delete(`/products/${id}`, {headers:{Authorization:`Bearer ${import.meta.env.VITE_VENDOR_JWT_TOKEN}`}});
+      await api.delete(`/products/${id}`);
 
       fetchProducts();
     } catch (error) {

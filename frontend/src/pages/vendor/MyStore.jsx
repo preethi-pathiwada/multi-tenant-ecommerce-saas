@@ -12,7 +12,7 @@ const MyStore = () => {
   useEffect(() => {
     const fetchStore = async () => {
       try {
-        const response = await api.get("/stores/my-store", {headers:{Authorization:`Bearer ${import.meta.env.VITE_VENDOR_JWT_TOKEN}`}});
+        const response = await api.get("/stores/my-store");
 
         setStore(response.data.store);
       } catch (error) {

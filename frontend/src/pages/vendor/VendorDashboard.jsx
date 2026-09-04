@@ -12,7 +12,7 @@ const VendorDashboard = () => {
     useEffect(() => {
         const fetchProductCount = async () => {
         try {
-            const response = await api.get("/products/my-store", {headers:{Authorization:`Bearer ${import.meta.env.VITE_VENDOR_JWT_TOKEN}`}});
+            const response = await api.get("/products/my-store");
 
             setProductCount(response.data.products.length);
         } 

@@ -32,7 +32,7 @@ const AddProduct = () => {
         description: form.description,
         price: Number(form.price),
         stock: Number(form.stock),
-      }, {headers:{Authorization:`Bearer ${import.meta.env.VITE_VENDOR_JWT_TOKEN}`}});
+      });
 
       alert("Product created successfully");
 

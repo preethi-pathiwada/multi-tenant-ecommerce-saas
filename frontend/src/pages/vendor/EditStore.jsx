@@ -16,7 +16,7 @@ const EditStore = () => {
   useEffect(() => {
     const fetchStore = async () => {
       try {
-        const response = await api.get("/stores/my-store", {headers:{Authorization:`Bearer ${import.meta.env.VITE_VENDOR_JWT_TOKEN}`}});
+        const response = await api.get("/stores/my-store");
 
         const store = response.data.store;
 
@@ -52,7 +52,7 @@ const EditStore = () => {
       await api.put("/stores/my-store", {
         name: form.name,
         description: form.description,
-      }, {headers:{Authorization:`Bearer ${import.meta.env.VITE_VENDOR_JWT_TOKEN}`}});
+      });
 
       alert("Store updated successfully");
 
