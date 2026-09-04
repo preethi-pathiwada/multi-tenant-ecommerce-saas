@@ -224,5 +224,55 @@ export const getVendorOrders = async (req, res) => {
   }
 };
 
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    const store = await Store.findOne({
+      owner: req.user._id,
+    });
+
+    if (!store) {
+      return res.status(404).json({
+        message: "Store not found",
+      });
+    }
+
+    const order = await Order.findOne({
+      _id: req.params.id,
+      store: store._id,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+      });
+    }
+
+    const allowedStatuses = ["CONFIRMED","SHIPPED", "DELIVERED", "CANCELLED"];
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid order status",
+      });
+    }
+
+    order.status = status;
+
+    await order.save();
+
+    res.status(200).json({
+      message: "Order status updated",
+      order,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to update order status",
+    });
+  }
+};
+
 
 
