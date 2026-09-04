@@ -75,6 +75,12 @@ const VendorDashboard = () => {
             >
             My Store
         </button>
+        <button
+            onClick={() => navigate("/vendor/orders")}
+            className="mt-4 rounded border px-5 py-3"
+            >
+            View Orders
+        </button>
         </div>
     );
 };
