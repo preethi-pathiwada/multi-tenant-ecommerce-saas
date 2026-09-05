@@ -294,4 +294,28 @@ export const getMyOrders = async (req, res) => {
   }
 };
 
+export const getMyOrderById = async (req, res) => {
+  try {
+    // console.log("Query params are", req.params)
+
+    const order = await Order.findOne({_id: req.params.id, customer: req.user._id}).populate("store", "name slug");
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+      });
+    }
+
+    res.status(200).json({
+      order,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch order",
+    });
+  }
+};
+
 

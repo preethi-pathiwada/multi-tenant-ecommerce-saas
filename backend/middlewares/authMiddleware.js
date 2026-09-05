@@ -13,7 +13,7 @@ export const protect = async (req, res, next) => {
 
         // const jwtToken = authHeader.split(" ")[1]
 
-        console.log("Checking if JWT is there", req.cookies);
+        // console.log("Checking if JWT is there", req.cookies);
 
         const jwtToken = req.cookies.jwt || req.headers.authorization?.split(" ")[1];
         
