@@ -74,3 +74,35 @@ export const getAllVendors = async (req, res) => {
     });
   }
 };
+
+export const toggleVendorStatus = async (req, res) => {
+    try {
+        const vendor = await User.findOne({
+            _id: req.params.id,
+            role: "VENDOR",
+        });
+
+        if (!vendor) {
+            return res.status(404).json({
+                message: "Vendor not found",
+            });
+        }
+
+        vendor.isActive = !vendor.isActive;
+
+        await vendor.save();
+
+        res.status(200).json({
+            message: `Vendor ${
+                vendor.isActive ? "activated" : "deactivated"
+            } successfully`,
+            vendor,
+        });
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            message: "Failed to update vendor status",
+        });
+    }
+};
