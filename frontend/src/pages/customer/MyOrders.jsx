@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import {Link} from "react-router-dom";
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -48,6 +49,7 @@ const MyOrders = () => {
                 <p>Total: ₹{order.totalAmount}</p>
                 <p>Items: {order.items.length}</p>
               </div>
+              <Link to={`/my-orders/${order._id}`} className="mt-3 inline-block text-blue-600">View Details</Link>
             </div>
           ))}
         </div>

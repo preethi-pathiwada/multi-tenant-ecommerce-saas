@@ -14,6 +14,7 @@ import MyStore from "./pages/vendor/MyStore";
 import EditStore from "./pages/vendor/EditStore";
 import VendorOrders from "./pages/vendor/VendorOrders";
 import MyOrders from "./pages/customer/MyOrders";
+import OrderDetails from "./pages/customer/OrderDetails";
 
 
 
@@ -34,6 +35,7 @@ const App = () => {
         <Route path="/vendor/store/edit" element={<EditStore/>}/>
         <Route path="/vendor/orders" element={<VendorOrders/>}/>
         <Route path="/my-orders" element={<MyOrders/>}/>
+        <Route path="/my-orders/:id" element = {<OrderDetails/>}/>
       </Routes>
   )
 }
