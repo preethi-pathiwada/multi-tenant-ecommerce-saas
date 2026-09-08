@@ -27,6 +27,12 @@ export const protect = async (req, res, next) => {
             })
         }
 
+        if (user.role === "VENDOR" && !user.isActive) {
+            return res.status(403).json({
+                message: "Your vendor account has been deactivated",
+            });
+        }
+
         req.user = user
         next()
 
