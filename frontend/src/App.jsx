@@ -1,6 +1,8 @@
 import { Routes, Route} from "react-router-dom"
 
+import RegistrationPage from "./pages/RegistrationPage";
 import LoginPage from "./pages/LoginPage";
+import HomePage from "./pages/HomePage";
 import StorePage from "./pages/StorePage";
 import ProductDetails from "./pages/ProductDetails";
 import CartPage from "./pages/CartPage";
@@ -22,7 +24,9 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 const App = () => {
   return(
       <Routes>
+        <Route path="/register" element = {<RegistrationPage/>}/>
         <Route path="/login" element = {<LoginPage/>}/>
+        <Route path="/" element = {<HomePage/>}/>
         <Route path="/store/:slug" element={<StorePage />}/>
         <Route path="/product/:productId" element={<ProductDetails />}/>
         <Route path="/cart" element={<CartPage/>}/>

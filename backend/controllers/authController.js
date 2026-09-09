@@ -8,7 +8,7 @@ import User from "../models/User.js";
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-
+  console.log(req.body)
     
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -46,6 +46,7 @@ export const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error(error)
     res.status(500).json({
       message: "Registration failed",
       error: error.message,
@@ -79,8 +80,6 @@ export const loginUser = async (req, res) => {
       user.password
     );
 
-      // console.log("Email is ", email);
-      // console.log("PAssword matching", isPasswordCorrect)
     if (!isPasswordCorrect) {
       return res.status(401).json({
         message: "Invalid email or password",

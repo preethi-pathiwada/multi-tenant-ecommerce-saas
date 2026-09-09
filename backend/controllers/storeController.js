@@ -54,10 +54,13 @@ export const createStore = async (req, res) => {
 };
 
 export const getMyStore = async (req, res) => {
+  console.log("User is", req.user)
   try {
     const store = await Store.findOne({
       owner: req.user._id,
     });
+
+    console.log("Store is", store);
 
     if (!store) {
       return res.status(404).json({
