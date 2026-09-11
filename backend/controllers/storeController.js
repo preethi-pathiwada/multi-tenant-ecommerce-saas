@@ -117,7 +117,7 @@ export const editStore = async (req, res) => {
   // console.log("STORE IS", store);
 
   store.name = name,
-  store.description = description
+  store.description = description || ""
 
   await store.save();
 
