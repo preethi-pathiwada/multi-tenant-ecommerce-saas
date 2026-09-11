@@ -29,6 +29,7 @@ const productSchema = new mongoose.Schema({
         ref:"Store",
         required:true
     },
+    slug:{type:String},
     variants:[
         {
             name:{

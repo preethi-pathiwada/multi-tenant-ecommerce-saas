@@ -45,6 +45,7 @@ export const createProduct = async (req, res) => {
             description,
             price,
             store: store._id
+           
         });
 
         if (isProductExist) {
@@ -83,6 +84,8 @@ export const createProduct = async (req, res) => {
             }
         }
 
+        console.log("Store Slug is ", store.slug)
+
         // 6. Create product
         const product = await Product.create({
             name,
@@ -91,8 +94,11 @@ export const createProduct = async (req, res) => {
             stock,
             images: imageUrls,
             store: store._id,
+            slug: store.slug,
             variants: parsedVariants
         });
+
+        console.log(product);
 
         // 7. Send response
         res.status(201).json({
@@ -244,6 +250,7 @@ export const updateProduct = async (req, res) => {
         product.description = description ?? product.description;
         product.price = price ?? product.price;
         product.stock = stock ?? product.stock;
+        product.slug = store.slug;
 
         // 5. Handle new image uploads
         if (req.files && req.files.length > 0) {

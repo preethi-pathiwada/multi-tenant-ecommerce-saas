@@ -60,7 +60,7 @@ export const getMyStore = async (req, res) => {
       owner: req.user._id,
     });
 
-    console.log("Store is", store);
+    // console.log("Store is", store);
 
     if (!store) {
       return res.status(404).json({
