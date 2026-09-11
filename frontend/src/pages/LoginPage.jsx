@@ -2,22 +2,17 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import api from "../services/api";
+
 const LoginPage = () => {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [formData, setFormData] = useState({email: "", password: ""});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({...formData, [e.target.name]: e.target.value});
   };
 
   const handleSubmit = async (e) => {
@@ -27,7 +22,8 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      
+        const response = await api.post("/auth/login", formData);
+        console.log(response.data)
       navigate("/");
     } catch (error) {
       setError(
