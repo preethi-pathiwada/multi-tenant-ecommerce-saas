@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../services/api";
 
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -13,8 +14,15 @@ const EditProduct = () => {
     stock: "",
   });
 
+  const [existingImages, setExistingImages] = useState([]);
+  const [newImages, setNewImages] = useState([]);
+  const [variants, setVariants] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  // FETCH PRODUCT
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -24,15 +32,28 @@ const EditProduct = () => {
         const product = response.data.product;
 
         setForm({
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          stock: product.stock,
+          name: product.name || "",
+          description: product.description || "",
+          price: product.price ?? "",
+          stock: product.stock ?? "",
         });
+
+        setExistingImages(product.images || []);
+
+        setVariants(
+          (product.variants || []).map((variant) => ({
+            name: variant.name || "",
+            price: variant.price ?? "",
+            stock: variant.stock ?? "",
+          }))
+        );
       } catch (error) {
         console.error(error);
 
-        alert("Failed to load product");
+        setError(
+          error.response?.data?.message ||
+            "Failed to load product"
+        );
       } finally {
         setLoading(false);
       }
@@ -41,6 +62,8 @@ const EditProduct = () => {
     fetchProduct();
   }, [id]);
 
+  // BASIC FORM
+
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -48,18 +71,194 @@ const EditProduct = () => {
     });
   };
 
+  // NEW IMAGE HANDLING
+
+  const handleImageChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+
+    const totalImages =
+      existingImages.length +
+      newImages.length +
+      selectedFiles.length;
+
+    if (totalImages > 5) {
+      setError("A product can have a maximum of 5 images.");
+      return;
+    }
+
+    const imageObjects = selectedFiles.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+
+    setNewImages((current) => [
+      ...current,
+      ...imageObjects,
+    ]);
+
+    setError("");
+
+    e.target.value = "";
+  };
+
+  const removeExistingImage = (index) => {
+    setExistingImages((current) =>
+      current.filter((_, imageIndex) => imageIndex !== index)
+    );
+  };
+
+  const removeNewImage = (index) => {
+    setNewImages((current) => {
+      const image = current[index];
+
+      if (image?.preview) {
+        URL.revokeObjectURL(image.preview);
+      }
+
+      return current.filter(
+        (_, imageIndex) => imageIndex !== index
+      );
+    });
+  };
+
+  // VARIANTS
+
+  const addVariant = () => {
+    setVariants((current) => [
+      ...current,
+      {
+        name: "",
+        price: "",
+        stock: "",
+      },
+    ]);
+  };
+
+  const updateVariant = (index, field, value) => {
+    setVariants((current) =>
+      current.map((variant, variantIndex) =>
+        variantIndex === index
+          ? {
+              ...variant,
+              [field]: value,
+            }
+          : variant
+      )
+    );
+  };
+
+  const removeVariant = (index) => {
+    setVariants((current) =>
+      current.filter((_, variantIndex) => variantIndex !== index)
+    );
+  };
+
+  // SUBMIT
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setError("");
+
+    if (!form.name.trim()) {
+      setError("Product name is required.");
+      return;
+    }
+
+    if (form.price === "" || Number(form.price) < 0) {
+      setError("Please enter a valid price.");
+      return;
+    }
+
+    if (form.stock === "" || Number(form.stock) < 0) {
+      setError("Please enter a valid stock quantity.");
+      return;
+    }
+
+    if (
+      existingImages.length + newImages.length > 5
+    ) {
+      setError("A product can have a maximum of 5 images.");
+      return;
+    }
+
+    for (const variant of variants) {
+      if (!variant.name.trim()) {
+        setError("Every variant must have a name.");
+        return;
+      }
+
+      if (
+        variant.price === "" ||
+        Number(variant.price) < 0
+      ) {
+        setError("Every variant must have a valid price.");
+        return;
+      }
+
+      if (
+        variant.stock === "" ||
+        Number(variant.stock) < 0
+      ) {
+        setError(
+          "Every variant must have a valid stock quantity."
+        );
+        return;
+      }
+    }
 
     try {
       setSaving(true);
 
-      await api.put(`/products/${id}`, {
-        name: form.name,
-        description: form.description,
-        price: Number(form.price),
-        stock: Number(form.stock),
-      });
+      const data = new FormData();
+
+      data.append("name", form.name.trim());
+      data.append(
+        "description",
+        form.description.trim()
+      );
+      data.append("price", Number(form.price));
+      data.append("stock", Number(form.stock));
+
+      // IMAGES
+        // My backend currently replaces all existing images when new files are uploaded.
+
+        // Therefore:
+
+        // - If NO new images are selected, send the remaining existing image URLs.
+
+        // - If NEW images are selected, the backend will replace the images with those newly uploaded files.
+      
+
+      if (newImages.length === 0) {
+        data.append(
+          "images",
+          JSON.stringify(existingImages)
+        );
+      } else {
+        newImages.forEach((image) => {
+          data.append("images", image.file);
+        });
+      }
+
+      // --------------------------------
+      // VARIANTS
+      // --------------------------------
+
+      const formattedVariants = variants.map(
+        (variant) => ({
+          name: variant.name.trim(),
+          price: Number(variant.price),
+          stock: Number(variant.stock),
+        })
+      );
+
+      data.append(
+        "variants",
+        JSON.stringify(formattedVariants)
+      );
+
+      await api.put(`/products/${id}`, data);
 
       alert("Product updated successfully");
 
@@ -67,7 +266,7 @@ const EditProduct = () => {
     } catch (error) {
       console.error(error);
 
-      alert(
+      setError(
         error.response?.data?.message ||
           "Failed to update product"
       );
@@ -76,71 +275,450 @@ const EditProduct = () => {
     }
   };
 
+  // --------------------------------
+  // LOADING
+  // --------------------------------
+
   if (loading) {
     return (
-      <div className="p-6">
-        Loading product...
+      <div className="min-h-screen bg-gradient-to-br from-white via-teal-50/30 to-white px-4 py-10">
+        <div className="mx-auto max-w-4xl">
+          <div className="rounded-3xl border border-white bg-white/80 p-8 shadow-sm backdrop-blur-xl">
+            <div className="h-8 w-48 animate-pulse rounded-lg bg-gray-200" />
+
+            <div className="mt-6 space-y-4">
+              <div className="h-12 animate-pulse rounded-xl bg-gray-100" />
+              <div className="h-32 animate-pulse rounded-xl bg-gray-100" />
+              <div className="h-12 animate-pulse rounded-xl bg-gray-100" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="mx-auto max-w-2xl rounded-lg bg-white p-6 shadow">
-        <h1 className="text-3xl font-bold">
-          Edit Product
-        </h1>
+    <div className="min-h-screen bg-gradient-to-br from-white via-teal-50/30 to-white px-4 py-6 sm:px-6 lg:px-8">
+
+      <div className="mx-auto max-w-4xl">
+
+        {/* HEADER */}
+        <div className="mb-8">
+          <button
+            type="button"
+            onClick={() => navigate("/vendor/products")}
+            className="mb-4 text-sm font-medium text-teal-600 transition hover:text-teal-700"
+          >
+            ← Back to Products
+          </button>
+
+          <p className="text-xs font-semibold uppercase tracking-widest text-teal-600">
+            Vendor Dashboard
+          </p>
+
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+            Edit Product
+          </h1>
+
+          <p className="mt-2 text-sm text-gray-500 sm:text-base">
+            Update your product information, images,
+            inventory and variants.
+          </p>
+        </div>
+
+        {/* ERROR */}
+        {error && (
+          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            {error}
+          </div>
+        )}
 
         <form
           onSubmit={handleSubmit}
-          className="mt-6 space-y-4"
+          className="space-y-6"
         >
-          <input
-            name="name"
-            placeholder="Product Name"
-            value={form.name}
-            onChange={handleChange}
-            className="w-full rounded border p-3"
-            required
-          />
 
-          <textarea
-            name="description"
-            placeholder="Product Description"
-            value={form.description}
-            onChange={handleChange}
-            rows="4"
-            className="w-full rounded border p-3"
-            required
-          />
+          {/* PRODUCT INFORMATION */}
+          <section className="rounded-3xl border border-white/80 bg-white/75 p-5 shadow-sm backdrop-blur-xl sm:p-7">
 
-          <input
-            name="price"
-            type="number"
-            placeholder="Price"
-            value={form.price}
-            onChange={handleChange}
-            className="w-full rounded border p-3"
-            required
-          />
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Product Information
+              </h2>
 
-          <input
-            name="stock"
-            type="number"
-            placeholder="Stock"
-            value={form.stock}
-            onChange={handleChange}
-            className="w-full rounded border p-3"
-            required
-          />
+              <p className="mt-1 text-sm text-gray-500">
+                Update the basic details of your product.
+              </p>
+            </div>
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full rounded bg-black py-3 text-white"
-          >
-            {saving ? "Saving..." : "Update Product"}
-          </button>
+            <div className="space-y-5">
+
+              {/* NAME */}
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700">
+                  Product Name
+                </label>
+
+                <input
+                  name="name"
+                  placeholder="Product Name"
+                  value={form.name}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                  required
+                />
+              </div>
+
+              {/* DESCRIPTION */}
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700">
+                  Product Description
+                </label>
+
+                <textarea
+                  name="description"
+                  placeholder="Product Description"
+                  value={form.description}
+                  onChange={handleChange}
+                  rows="5"
+                  className="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                  required
+                />
+              </div>
+
+              {/* PRICE + STOCK */}
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Price
+                  </label>
+
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                      ₹
+                    </span>
+
+                    <input
+                      name="price"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={form.price}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-9 pr-4 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Stock
+                  </label>
+
+                  <input
+                    name="stock"
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={form.stock}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                    required
+                  />
+                </div>
+
+              </div>
+            </div>
+          </section>
+
+          {/* IMAGES */}
+          <section className="rounded-3xl border border-white/80 bg-white/75 p-5 shadow-sm backdrop-blur-xl sm:p-7">
+
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Product Images
+                </h2>
+
+                <p className="mt-1 text-sm text-gray-500">
+                  Manage your product images.
+                </p>
+              </div>
+
+              <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
+                {existingImages.length + newImages.length}/5
+              </span>
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageChange}
+              className="hidden"
+            />
+
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
+
+              {/* ADD IMAGE */}
+              {existingImages.length +
+                newImages.length <
+                5 && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    fileInputRef.current?.click()
+                  }
+                  className="flex aspect-square flex-col items-center justify-center rounded-2xl border-2 border-dashed border-teal-200 bg-teal-50/40 p-4 transition hover:border-teal-400 hover:bg-teal-50"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-2xl text-teal-600 shadow-sm">
+                    +
+                  </div>
+
+                  <span className="mt-3 text-xs font-semibold text-gray-700">
+                    Add Image
+                  </span>
+
+                  <span className="mt-1 text-[11px] text-gray-400">
+                    JPG / PNG
+                  </span>
+                </button>
+              )}
+
+              {/* EXISTING IMAGES */}
+              {existingImages.map(
+                (image, index) => (
+                  <div
+                    key={image}
+                    className="group relative aspect-square overflow-hidden rounded-2xl border border-gray-200 bg-gray-100"
+                  >
+                    <img
+                      src={image}
+                      alt={`Product ${index + 1}`}
+                      className="h-full w-full object-cover"
+                    />
+
+                    {index === 0 && (
+                      <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-teal-700 shadow-sm backdrop-blur">
+                        Main Image
+                      </span>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        removeExistingImage(index)
+                      }
+                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-lg text-white transition hover:bg-red-500"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )
+              )}
+
+              {/* NEW IMAGES */}
+              {newImages.map(
+                (image, index) => (
+                  <div
+                    key={`${image.file.name}-${index}`}
+                    className="group relative aspect-square overflow-hidden rounded-2xl border border-teal-200 bg-gray-100"
+                  >
+                    <img
+                      src={image.preview}
+                      alt={`New product ${index + 1}`}
+                      className="h-full w-full object-cover"
+                    />
+
+                    <span className="absolute left-2 top-2 rounded-full bg-teal-600 px-2.5 py-1 text-[10px] font-semibold text-white">
+                      New
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        removeNewImage(index)
+                      }
+                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-lg text-white transition hover:bg-red-500"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )
+              )}
+
+            </div>
+
+            <p className="mt-4 text-xs leading-5 text-gray-400">
+              You can keep your existing images or replace them
+              with newly uploaded images. Maximum 5 images.
+            </p>
+          </section>
+
+          {/* VARIANTS */}
+          <section className="rounded-3xl border border-white/80 bg-white/75 p-5 shadow-sm backdrop-blur-xl sm:p-7">
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Product Variants
+                </h2>
+
+                <p className="mt-1 text-sm text-gray-500">
+                  Update sizes, colors or other variations.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={addVariant}
+                className="rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700"
+              >
+                + Add Variant
+              </button>
+            </div>
+
+            {variants.length === 0 ? (
+              <div className="mt-6 rounded-2xl border border-dashed border-gray-200 bg-gray-50/70 px-5 py-8 text-center">
+                <p className="text-sm font-medium text-gray-600">
+                  No variants added
+                </p>
+
+                <p className="mt-1 text-xs text-gray-400">
+                  Variants are optional.
+                </p>
+              </div>
+            ) : (
+              <div className="mt-6 space-y-4">
+
+                {variants.map(
+                  (variant, index) => (
+                    <div
+                      key={index}
+                      className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5"
+                    >
+                      <div className="mb-4 flex items-center justify-between">
+                        <span className="text-sm font-semibold text-gray-800">
+                          Variant {index + 1}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeVariant(index)
+                          }
+                          className="text-xs font-semibold text-red-500 transition hover:text-red-600"
+                        >
+                          Remove
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+
+                        {/* NAME */}
+                        <div>
+                          <label className="mb-2 block text-xs font-medium text-gray-600">
+                            Variant Name
+                          </label>
+
+                          <input
+                            type="text"
+                            value={variant.name}
+                            onChange={(e) =>
+                              updateVariant(
+                                index,
+                                "name",
+                                e.target.value
+                              )
+                            }
+                            placeholder="e.g. Medium"
+                            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-100"
+                          />
+                        </div>
+
+                        {/* PRICE */}
+                        <div>
+                          <label className="mb-2 block text-xs font-medium text-gray-600">
+                            Price
+                          </label>
+
+                          <input
+                            type="number"
+                            min="0"
+                            value={variant.price}
+                            onChange={(e) =>
+                              updateVariant(
+                                index,
+                                "price",
+                                e.target.value
+                              )
+                            }
+                            placeholder="₹ 0"
+                            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-100"
+                          />
+                        </div>
+
+                        {/* STOCK */}
+                        <div>
+                          <label className="mb-2 block text-xs font-medium text-gray-600">
+                            Stock
+                          </label>
+
+                          <input
+                            type="number"
+                            min="0"
+                            value={variant.stock}
+                            onChange={(e) =>
+                              updateVariant(
+                                index,
+                                "stock",
+                                e.target.value
+                              )
+                            }
+                            placeholder="0"
+                            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-100"
+                          />
+                        </div>
+
+                      </div>
+                    </div>
+                  )
+                )}
+
+              </div>
+            )}
+          </section>
+
+          {/* ACTIONS */}
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/vendor/products")
+              }
+              disabled={saving}
+              className="rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="rounded-xl bg-teal-600 px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saving
+                ? "Saving..."
+                : "Update Product"}
+            </button>
+
+          </div>
+
         </form>
       </div>
     </div>
