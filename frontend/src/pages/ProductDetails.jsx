@@ -102,7 +102,7 @@ const ProductDetails = () => {
                     variantId: selectedVariant?._id || null,
                     name: product.name,
                     variantName: selectedVariant?.name || null,
-                    price: selectedVariant?.price || null,
+                    price: selectedVariant?.price || product.price,
                     store: product.store
                 })
                 )

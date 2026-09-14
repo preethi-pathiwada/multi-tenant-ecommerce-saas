@@ -78,6 +78,8 @@ const CartPage = () => {
     );
   }
 
+  
+
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -123,6 +125,7 @@ const CartPage = () => {
           <div className="space-y-4 lg:col-span-2">
 
             {cartItems.map((item) => {
+              console.log("Item is ", item.variantName)
               const image = item.image || item.images?.[0] || null;
 
               const itemSubtotal = item.price * item.quantity;
