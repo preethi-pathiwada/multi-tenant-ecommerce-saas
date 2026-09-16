@@ -10,6 +10,7 @@ import storeRoutes from "./routes/storeRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import addressRoutes from "./routes/addressRoutes.js";
 
 
 const app = express();
@@ -39,5 +40,6 @@ app.use("/api/stores", storeRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/addresses", addressRoutes);
 
 export default app;
