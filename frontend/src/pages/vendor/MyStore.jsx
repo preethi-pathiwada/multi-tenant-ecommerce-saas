@@ -54,7 +54,7 @@ const MyStore = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-gray-100 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
 
         {/* Header */}
@@ -82,7 +82,7 @@ const MyStore = () => {
         </div>
 
         {/* Store Overview */}
-        <div className="mt-8 overflow-hidden rounded-3xl border border-gray-200/80 bg-white/80 shadow-sm backdrop-blur-xl">
+        <div className="mt-8 overflow-hidden rounded-3xl border-2 border-teal-200 bg-white shadow-lg backdrop-blur-xl">
 
           {/* Store Header */}
           <div className="border-b border-gray-100 bg-gradient-to-r from-teal-50/80 to-white px-6 py-7 sm:px-8">

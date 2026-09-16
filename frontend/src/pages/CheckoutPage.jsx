@@ -5,6 +5,7 @@ import { ShieldCheckIcon } from '@heroicons/react/24/outline';
 
 import api from "../services/api";
 import { clearCart } from "../store/cartSlice";
+import CustomerHeader from "./customer/CustomerHeader";
 
 
 // LOAD RAZORPAY SCRIPT
@@ -255,6 +256,7 @@ const CheckoutPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
+      <CustomerHeader/>
       <div className="mx-auto max-w-7xl">
 
         {/* HEADER */}

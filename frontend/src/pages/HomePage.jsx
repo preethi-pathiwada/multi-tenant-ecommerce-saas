@@ -7,86 +7,65 @@ const HomePage = () => {
     <div className="min-h-screen overflow-x-hidden bg-white text-slate-900">
 
       {/* =========================================================
-          NAVBAR
-      ========================================================== */}
-      <header className="relative z-50 px-4 pt-4 sm:px-6 lg:px-8">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-xl sm:px-5">
+        NAVBAR
+    ========================================================= */}
+    <header className="relative z-50 px-4 pt-5 sm:px-6 lg:px-8">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between rounded-2xl border border-slate-200/80 bg-white/85 px-5 py-3.5 shadow-sm backdrop-blur-xl">
 
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white">
+            M
+          </div>
 
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-600 text-white shadow-sm">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.8"
-                stroke="currentColor"
-                className="h-5 w-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1 5h13M10 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z"
-                />
-              </svg>
-            </div>
+          <span className="text-lg font-semibold tracking-tight text-slate-900">
+            Market<span className="text-slate-500">Hub</span>
+          </span>
+        </Link>
 
-            <span className="text-lg font-semibold tracking-tight">
-              Market<span className="text-teal-600">Hub</span>
-            </span>
+        {/* Desktop Navigation */}
+        <div className="hidden items-center gap-8 md:flex">
+          <a
+            href="#features"
+            className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
+          >
+            Features
+          </a>
 
+          <a
+            href="#vendors"
+            className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
+          >
+            For Vendors
+          </a>
+
+          <a
+            href="#about"
+            className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
+          >
+            About
+          </a>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-2.5">
+          <Link
+            to="/login"
+            className="hidden rounded-xl px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 sm:block"
+          >
+            Login
           </Link>
 
+          <Link
+            to="/register"
+            className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+          >
+            Get Started
+          </Link>
+        </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden items-center gap-8 md:flex">
-
-            <a
-              href="#features"
-              className="text-sm text-slate-600 transition hover:text-teal-600"
-            >
-              Features
-            </a>
-
-            <a
-              href="#vendors"
-              className="text-sm text-slate-600 transition hover:text-teal-600"
-            >
-              For Vendors
-            </a>
-
-            <a
-              href="#about"
-              className="text-sm text-slate-600 transition hover:text-teal-600"
-            >
-              About
-            </a>
-
-          </div>
-
-
-          {/* Authentication */}
-          <div className="flex items-center gap-2">
-
-            <Link
-              to="/login"
-              className="hidden px-3 py-2 text-sm font-medium text-slate-600 transition hover:text-teal-600 sm:block"
-            >
-              Login
-            </Link>
-
-            <Link
-              to="/register"
-              className="rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700"
-            >
-              Get Started
-            </Link>
-
-          </div>
-
-        </nav>
-      </header>
+      </nav>
+    </header>
 
 
       {/* =========================================================
@@ -104,7 +83,7 @@ const HomePage = () => {
           </div>
 
 
-          <div className="mx-auto max-w-6xl px-4 pb-0 pt-20 sm:px-6 sm:pb-28 sm:pt-24 lg:px-8 lg:pt-28">
+          <div className="mx-auto max-w-6xl px-4 pb-20 pt-20 sm:px-6 sm:pb-28 sm:pt-24 lg:px-8 lg:pt-28">
 
             <div className="mx-auto max-w-3xl text-center">
 

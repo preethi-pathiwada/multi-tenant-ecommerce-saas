@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
+import CustomerHeader from "./customer/CustomerHeader";
 
 const OrderSuccess = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-6">
+      <CustomerHeader/>
       <div className="rounded-lg bg-white p-8 text-center shadow">
         <h1 className="text-3xl font-bold">
           Order Placed Successfully!

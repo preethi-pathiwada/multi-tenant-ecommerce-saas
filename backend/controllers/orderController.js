@@ -5,95 +5,17 @@ import Store from "../models/Store.js";
 import Product from "../models/Product.js";
 import razorpay from "../config/razorpay.js";
 
-//{customer, store, items:[{productId, variantId, name, price, quantity}], totalAmount, shippingAddress:{name, phone, address, city, state, pincode}, status, paymentStatus}
-
-// export const createOrder = async (req, res) => {
-//   try {
-//     const {store, items, shippingAddress} = req.body;
-//     console.log(store)
-
-//     if (!store || !items || items.length === 0) {
-//       return res.status(400).json({
-//         message: "Store and items are required",
-//       });
-//     }
-
-//     if (!shippingAddress) {
-//       return res.status(400).json({
-//         message: "Shipping address is required",
-//       });
-//     }
-
-//     let totalAmount = 0;
-
-//     const orderItems = [];
-
-//     for (const item of items) {
-//       const product = await Product.findById(
-//         item.productId
-//       );
-
-//       if (!product) {
-//         return res.status(404).json({
-//           message: "Product not found",
-//         });
-//       }
-
-//       let price = product.price;
-//       let variantName = null;
-
-//       if (item.variantId) {
-//         const variant = product.variants.id(       //MongoDb has a method to find a specific resource in its sub documents through id()
-//           item.variantId
-//         );
-
-//         if (!variant) {
-//           return res.status(404).json({
-//             message: "Variant not found",
-//           });
-//         }
-
-//         price = variant.price;
-//         variantName = variant.name;
-//       }
-
-//       totalAmount += price * item.quantity;
-
-//       orderItems.push({
-//         product: product._id,
-//         variantId: item.variantId || null,
-//         name: product.name,
-//         variantName,
-//         price,
-//         quantity: item.quantity,
-//       });
-//     }
-
-//     const order = await Order.create({
-//       customer: req.user._id,
-//       store,
-//       items: orderItems,
-//       totalAmount,
-//       shippingAddress,
-//     });
-
-//     res.status(201).json({
-//       message: "Order created successfully",
-//       order,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       message: "Failed to create order",
-//       error: error.message,
-//     });
-//   }
-// };
-
 export const createOrder = async (req, res) => {
   try {
-    const { store, items, shippingAddress } = req.body;
+    const {
+      store,
+      items,
+      shippingAddress,
+    } = req.body;
 
-    console.log("Items are ", items);
+    // --------------------------------
+    // BASIC VALIDATION
+    // --------------------------------
 
     if (!store || !items || items.length === 0) {
       return res.status(400).json({
@@ -107,13 +29,42 @@ export const createOrder = async (req, res) => {
       });
     }
 
+    // --------------------------------
+    // FIND STORE
+    // --------------------------------
+
+    const storeExists = await Store.findById(store);
+
+    if (!storeExists) {
+      return res.status(404).json({
+        message: "Store not found",
+      });
+    }
+
     let totalAmount = 0;
 
     const orderItems = [];
 
-    // First: validate products and stock
+    // --------------------------------
+    // VALIDATE PRODUCTS
+    // --------------------------------
+
     for (const item of items) {
-      const product = await Product.findById(item.productId);
+
+      if (
+        !item.productId ||
+        !item.quantity ||
+        item.quantity < 1 ||
+        !Number.isInteger(item.quantity)
+      ) {
+        return res.status(400).json({
+          message: "Invalid product quantity",
+        });
+      }
+
+      const product = await Product.findById(
+        item.productId
+      );
 
       if (!product) {
         return res.status(404).json({
@@ -121,12 +72,31 @@ export const createOrder = async (req, res) => {
         });
       }
 
+      // --------------------------------
+      // IMPORTANT:
+      // PRODUCT MUST BELONG TO THIS STORE
+      // --------------------------------
+
+      if (
+        product.store.toString() !==
+        store.toString()
+      ) {
+        return res.status(400).json({
+          message: "Product does not belong to this store",
+        });
+      }
+
       let price = product.price;
       let variantName = null;
 
-      // Variant product
+      // --------------------------------
+      // VARIANT PRODUCT
+      // --------------------------------
+
       if (item.variantId) {
-        const variant = product.variants.id(item.variantId);  //MongoDb has a method to find a specific resource in its sub documents through id()
+
+        const variant =
+          product.variants.id(item.variantId);
 
         if (!variant) {
           return res.status(404).json({
@@ -137,65 +107,91 @@ export const createOrder = async (req, res) => {
         // Check variant stock
         if (variant.stock < item.quantity) {
           return res.status(400).json({
-            message: `Insufficient stock for ${product.name} - ${variant.name}`,
+            message:
+              `Insufficient stock for ${product.name} - ${variant.name}`,
           });
         }
 
         price = variant.price;
         variantName = variant.name;
+
       } else {
-        // Normal product stock
+
+        // --------------------------------
+        // NORMAL PRODUCT
+        // --------------------------------
+
         if (product.stock < item.quantity) {
           return res.status(400).json({
-            message: `Insufficient stock for ${product.name}`,
+            message:
+              `Insufficient stock for ${product.name}`,
           });
         }
       }
 
-      totalAmount += price * item.quantity;
+      // --------------------------------
+      // CALCULATE TOTAL
+      // --------------------------------
+
+      totalAmount +=
+        price * item.quantity;
+
+      // --------------------------------
+      // SAVE SNAPSHOT OF PRODUCT DATA
+      // --------------------------------
 
       orderItems.push({
         product: product._id,
-        variantId: item.variantId || null,
+
+        variantId:
+          item.variantId || null,
+
         name: product.name,
+
         variantName,
+
         price,
+
         quantity: item.quantity,
       });
     }
 
-    // Second: reduce stock
-    for (const item of items) {
-      const product = await Product.findById(item.productId);
+    // --------------------------------
+    // CREATE PENDING ORDER
+    // --------------------------------
 
-      if (item.variantId) {
-        const variant = product.variants.id(item.variantId);
-
-        variant.stock -= item.quantity;
-
-        await product.save();
-      } else {
-        product.stock -= item.quantity;
-
-        await product.save();
-      }
-    }
-
-    // Third: create order
     const order = await Order.create({
       customer: req.user._id,
+
       store,
+
       items: orderItems,
+
       totalAmount,
+
       shippingAddress,
+
+      status: "PENDING",
+
+      paymentStatus: "PENDING",
     });
+
+    // --------------------------------
+    // IMPORTANT:
+    // DO NOT REDUCE STOCK HERE
+    // --------------------------------
 
     res.status(201).json({
       message: "Order created successfully",
       order,
     });
+
   } catch (error) {
-    console.error(error);
+
+    console.error(
+      "Create order error:",
+      error
+    );
 
     res.status(500).json({
       message: "Failed to create order",
@@ -203,6 +199,7 @@ export const createOrder = async (req, res) => {
     });
   }
 };
+
 
 
 export const createRazorpayOrder = async (req, res) => {
@@ -249,12 +246,21 @@ export const createRazorpayOrder = async (req, res) => {
   }
 };
 
+
 export const verifyRazorpayPayment = async (req, res) => {
   try {
-  
-    const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
 
-    console.log(req.body);
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+    } = req.body;
+
+
+    // --------------------------------
+    // FIND OUR ORDER
+    // --------------------------------
+
     const order = await Order.findOne({
       razorpayOrderId: razorpay_order_id,
     });
@@ -265,48 +271,200 @@ export const verifyRazorpayPayment = async (req, res) => {
       });
     }
 
+
+    // --------------------------------
+    // CHECK ORDER OWNER
+    // --------------------------------
+
     if (
       order.customer.toString() !==
       req.user._id.toString()
     ) {
       return res.status(403).json({
-        message: "You are not allowed to verify this order",
+        message:
+          "You are not allowed to verify this order",
       });
     }
 
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
 
-    const expectedSignature = crypto
-      .createHmac(
-        "sha256",
-        process.env.RAZORPAY_KEY_SECRET
-      )
-      .update(body)
-      .digest("hex");
+    // --------------------------------
+    // PREVENT DOUBLE VERIFICATION
+    // --------------------------------
 
-    if (expectedSignature !== razorpay_signature) {
+    if (order.paymentStatus === "PAID") {
+      return res.status(400).json({
+        message: "Payment has already been verified",
+      });
+    }
+
+
+    // --------------------------------
+    // GENERATE EXPECTED SIGNATURE
+    // --------------------------------
+
+    const body =
+      razorpay_order_id +
+      "|" +
+      razorpay_payment_id;
+
+    const expectedSignature =
+      crypto
+        .createHmac(
+          "sha256",
+          process.env.RAZORPAY_KEY_SECRET
+        )
+        .update(body)
+        .digest("hex");
+
+
+    // --------------------------------
+    // VERIFY SIGNATURE
+    // --------------------------------
+
+    if (
+      expectedSignature !==
+      razorpay_signature
+    ) {
       return res.status(400).json({
         message: "Invalid payment signature",
       });
     }
 
-    order.razorpayPaymentId = razorpay_payment_id;
+
+    // --------------------------------
+    // VERIFY STOCK AGAIN
+    // --------------------------------
+
+    // Stock may have changed between
+    // checkout and successful payment.
+
+    for (const item of order.items) {
+
+      const product =
+        await Product.findById(item.product);
+
+      if (!product) {
+        return res.status(404).json({
+          message:
+            `Product ${item.name} no longer exists`,
+        });
+      }
+
+
+      // --------------------------------
+      // VARIANT STOCK
+      // --------------------------------
+
+      if (item.variantId) {
+
+        const variant =
+          product.variants.id(
+            item.variantId
+          );
+
+        if (!variant) {
+          return res.status(404).json({
+            message:
+              `Variant for ${item.name} no longer exists`,
+          });
+        }
+
+        if (
+          variant.stock <
+          item.quantity
+        ) {
+          return res.status(400).json({
+            message:
+              `Insufficient stock for ${item.name} - ${item.variantName}`,
+          });
+        }
+
+      } else {
+
+        // --------------------------------
+        // NORMAL PRODUCT STOCK
+        // --------------------------------
+
+        if (
+          product.stock <
+          item.quantity
+        ) {
+          return res.status(400).json({
+            message:
+              `Insufficient stock for ${item.name}`,
+          });
+        }
+      }
+    }
+
+
+    // --------------------------------
+    // REDUCE STOCK
+    // --------------------------------
+
+    for (const item of order.items) {
+
+      const product =
+        await Product.findById(item.product);
+
+      if (item.variantId) {
+
+        const variant =
+          product.variants.id(
+            item.variantId
+          );
+
+        variant.stock -= item.quantity;
+
+      } else {
+
+        product.stock -= item.quantity;
+      }
+
+      await product.save();
+    }
+
+
+    // --------------------------------
+    // UPDATE PAYMENT
+    // --------------------------------
+
+    order.razorpayPaymentId =
+      razorpay_payment_id;
 
     order.paymentStatus = "PAID";
+
     order.status = "CONFIRMED";
+
 
     await order.save();
 
+
+    // --------------------------------
+    // RESPONSE
+    // --------------------------------
+
     res.status(200).json({
-      message: "Payment verified successfully",
+      message:
+        "Payment verified successfully",
+      order,
     });
+
   } catch (error) {
+
+    console.error(
+      "Payment verification error:",
+      error
+    );
+
     res.status(500).json({
-      message: "Payment verification failed",
+      message:
+        "Payment verification failed",
       error: error.message,
     });
   }
 };
+
 
 
 //Need to implement webhook logic here which I'll later after the backend deployment

@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import {removeFromCart, clearCart, increaseQuantity, decreaseQuantity} from "../store/cartSlice";
+import CustomerHeader from "./customer/CustomerHeader";
 import { useNavigate } from "react-router-dom";
 
 const CartPage = () => {
@@ -37,6 +38,7 @@ const CartPage = () => {
   if (cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8">
+        <CustomerHeader/>
         <div className="mx-auto flex min-h-[70vh] max-w-3xl items-center justify-center">
           <div className="w-full rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-sm sm:p-12">
 
@@ -82,6 +84,7 @@ const CartPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
+      <CustomerHeader/>
       <div className="mx-auto max-w-7xl">
 
         {/* --------------------------------
