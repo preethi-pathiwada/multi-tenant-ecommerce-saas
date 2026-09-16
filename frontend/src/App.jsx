@@ -18,6 +18,7 @@ import VendorOrders from "./pages/vendor/VendorOrders";
 import MyOrders from "./pages/customer/MyOrders";
 import OrderDetails from "./pages/customer/OrderDetails";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import ManageAddresses from "./pages/customer/ManageAddresses";
 
 
 
@@ -42,6 +43,7 @@ const App = () => {
         <Route path="/my-orders" element={<MyOrders/>}/>
         <Route path="/my-orders/:id" element = {<OrderDetails/>}/>
         <Route path="/admin/dashboard" element = {<AdminDashboard/>}/>
+        <Route path="/manage-addresses" element={<ManageAddresses />}/>
       </Routes>
   )
 }
