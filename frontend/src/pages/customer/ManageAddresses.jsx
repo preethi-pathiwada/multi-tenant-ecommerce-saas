@@ -1,19 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import api from "../../services/api";
 import CustomerHeader from "./CustomerHeader";
 
-const emptyForm = {
-  label: "HOME",
-  name: "",
-  phone: "",
-  address: "",
-  city: "",
-  state: "",
-  pincode: "",
-  isDefault: false,
-};
+const emptyForm = {label: "HOME", name: "", phone: "", address: "", city: "", state: "", pincode: "", isDefault: false};
 
 const ManageAddresses = () => {
   const [addresses, setAddresses] = useState([]);
@@ -24,6 +15,10 @@ const ManageAddresses = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const fromCheckout = location.state?.from === "checkout";
 
   const fetchAddresses = async () => {
     try {
@@ -60,10 +55,7 @@ const ManageAddresses = () => {
   const openAddForm = () => {
     setEditingId(null);
 
-    setForm({
-      ...emptyForm,
-      isDefault: addresses.length === 0,
-    });
+    setForm({...emptyForm, isDefault: addresses.length === 0});
 
     setShowForm(true);
   };
@@ -214,12 +206,15 @@ const ManageAddresses = () => {
 
         {/* Back to Checkout */}
         <div className="mb-6">
-          <Link
-            to="/checkout"
-            className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-white/70 hover:text-teal-700"
-          >
-            ← Back to Checkout
-          </Link>
+            {fromCheckout ? (
+                <button type="button" onClick={() => navigate("/checkout")} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-white/70 hover:text-teal-700">
+                ← Back to Checkout
+                </button>
+            ) : (
+                <Link to="/" className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-white/70 hover:text-teal-700">
+                ← Back to Home
+                </Link>
+            )}
         </div>
 
         {/* Add / Edit Form */}
@@ -269,9 +264,7 @@ const ManageAddresses = () => {
                     { value: "WORK", label: "Work", icon: "▣" },
                     { value: "OTHER", label: "Other", icon: "◆" },
                   ].map((item) => (
-                    <button
-                      key={item.value}
-                      type="button"
+                    <button key={item.value} type="button"
                       onClick={() =>
                         setForm((previous) => ({
                           ...previous,

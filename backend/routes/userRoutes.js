@@ -1,5 +1,6 @@
 import express from "express";
 import {protect, authorize} from "../middlewares/authMiddleware.js";
+import { getCurrentUser, updateCurrentUser } from "../controllers/userController.js";
 
 const router = express.Router();
 
@@ -29,5 +30,8 @@ router.get("/customer-test", protect, authorize("CUSTOMER"), (req, res) => {
     message:"Welcome CUSTOMER"
   })
 });
+
+router.get("/me", protect, authorize("CUSTOMER"), getCurrentUser);
+router.put("/me", protect, authorize("CUSTOMER"), updateCurrentUser);
 
 export default router;

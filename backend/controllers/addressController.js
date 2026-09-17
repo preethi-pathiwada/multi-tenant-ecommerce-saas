@@ -1,5 +1,4 @@
 import Address from "../models/Address.js";
-import Order from "../models/Order.js";
 
 // GET all saved addresses
 export const getAddresses = async (req, res) => {
@@ -86,6 +85,12 @@ export const updateAddress = async (req, res) => {
 
     if (isDefault === true) {
       await Address.updateMany({ user: req.user._id }, { $set: { isDefault: false } });
+    }
+
+    if (existingAddress.isDefault && isDefault === false) {
+      return res.status(400).json({
+        message: "At least one address must remain default. Set another address as default first.",
+      });
     }
 
     existingAddress.label = label || existingAddress.label;

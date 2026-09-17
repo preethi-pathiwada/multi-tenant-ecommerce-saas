@@ -19,6 +19,7 @@ import MyOrders from "./pages/customer/MyOrders";
 import OrderDetails from "./pages/customer/OrderDetails";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageAddresses from "./pages/customer/ManageAddresses";
+import AccountInformation from "./pages/customer/AccountInformation";
 
 
 
@@ -44,6 +45,7 @@ const App = () => {
         <Route path="/my-orders/:id" element = {<OrderDetails/>}/>
         <Route path="/admin/dashboard" element = {<AdminDashboard/>}/>
         <Route path="/manage-addresses" element={<ManageAddresses />}/>
+        <Route path="/account-information" element={<AccountInformation />}/>
       </Routes>
   )
 }

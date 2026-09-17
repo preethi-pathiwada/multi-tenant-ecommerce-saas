@@ -557,7 +557,7 @@ const CheckoutPage = () => {
                     className="inline-flex items-center justify-center rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-xs font-bold text-teal-700 transition hover:bg-teal-100"
                   >
                     Manage Addresses
-                  </Link>
+                </Link>
 
                 </div>
 

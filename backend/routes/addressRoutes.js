@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/", protect, authorize("CUSTOMER"), getAddresses)
 router.post("/", protect, authorize("CUSTOMER"), createAddress);
-router.post("/:id", protect, authorize("CUSTOMER"), updateAddress);
+router.put("/:id", protect, authorize("CUSTOMER"), updateAddress);
 router.delete("/:id", protect, authorize("CUSTOMER"), deleteAddress);
 router.patch("/:id/default", protect, authorize("CUSTOMER"), setDefaultAddress);
 
