@@ -126,3 +126,22 @@ export const editStore = async (req, res) => {
     store
   })
 }
+
+export const getAllStores = async (req, res) => {
+  try {
+    const stores = await Store.find({})
+      .select("name description slug")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      stores,
+    });
+  } catch (error) {
+    console.error("Failed to get stores:", error);
+
+    res.status(500).json({
+      message: "Failed to get stores",
+      error: error.message,
+    });
+  }
+};
