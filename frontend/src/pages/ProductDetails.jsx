@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
 import api from "../services/api";
-import { addToCart } from "../store/cartSlice";
+import { addToCart } from "../redux/cartSlice";
 import CustomerHeader from "./customer/CustomerHeader";
 
 const ProductDetails = () => {

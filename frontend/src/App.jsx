@@ -21,6 +21,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageAddresses from "./pages/customer/ManageAddresses";
 import AccountInformation from "./pages/customer/AccountInformation";
 import AllStores from "./pages/admin/AllStores";
+import VerifyEmailPage from "./pages/verifyEmailPage";
 
 
 const App = () => {
@@ -47,6 +48,7 @@ const App = () => {
         <Route path="/manage-addresses" element={<ManageAddresses />}/>
         <Route path="/account-information" element={<AccountInformation />}/>
         <Route path = "/stores" element = {<AllStores/>}/>
+        <Route path="/verify-email/:token" element={<VerifyEmailPage />}/>
       </Routes>
   )
 }

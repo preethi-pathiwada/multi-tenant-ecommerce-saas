@@ -1,9 +1,26 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { GoogleLogin } from "@react-oauth/google";
+
 import api from "../services/api";
+import { setUser } from "../redux/authSlice";
+
+import {
+  UserIcon,
+  EnvelopeIcon,
+  LockClosedIcon,
+  UserPlusIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  ExclamationCircleIcon,
+  BuildingStorefrontIcon,
+  CheckCircleIcon,
+} from "@heroicons/react/24/outline";
 
 const RegistrationPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -12,27 +29,131 @@ const RegistrationPage = () => {
     role: "CUSTOMER",
   });
 
+  const [errors, setErrors] = useState({});
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // =========================
+  // VALIDATION
+  // =========================
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ' -]{2,}$/;
+
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
+    // NAME
+    if (!formData.name.trim()) {
+      newErrors.name = "Please enter your full name.";
+    } else if (!nameRegex.test(formData.name.trim())) {
+      newErrors.name = "Please enter a valid name.";
+    }
+
+    // EMAIL
+    if (!formData.email.trim()) {
+      newErrors.email = "Please enter your email address.";
+    } else if (!emailRegex.test(formData.email.trim())) {
+      newErrors.email = "Please enter a valid email address.";
+    }
+
+    // PASSWORD
+    if (!formData.password) {
+      newErrors.password = "Please create a password.";
+    } else if (formData.password.length < 8) {
+      newErrors.password =
+        "Password must contain at least 8 characters.";
+    } else if (!/[A-Z]/.test(formData.password)) {
+      newErrors.password =
+        "Password must contain at least one uppercase letter.";
+    } else if (!/[a-z]/.test(formData.password)) {
+      newErrors.password =
+        "Password must contain at least one lowercase letter.";
+    } else if (!/[0-9]/.test(formData.password)) {
+      newErrors.password =
+        "Password must contain at least one number.";
+    } else if (!/[^A-Za-z0-9]/.test(formData.password)) {
+      newErrors.password =
+        "Password must contain at least one special character.";
+    }
+
+    // ROLE
+    if (!["CUSTOMER", "VENDOR"].includes(formData.role)) {
+      newErrors.role = "Please select a valid account type.";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // =========================
+  // INPUT CHANGE
+  // =========================
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setError("");
+    setSuccess("");
+
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
   };
+
+  // =========================
+  // NORMAL REGISTRATION
+  // =========================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     setError("");
+    setSuccess("");
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const response  = await api.post("/auth/register", formData);
-      console.log(response.data);
-      navigate("/login");
+      const response = await api.post("/auth/register", {
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
+        role: formData.role,
+      });
+
+      console.log("Registration response:", response.data);
+
+      setSuccess(
+        response.data.message ||
+          "Registration successful. Please check your email to verify your account."
+      );
+
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        role: "CUSTOMER",
+      });
     } catch (error) {
+      console.error("Registration error:", error);
+
       setError(
         error.response?.data?.message ||
           "Unable to create your account. Please try again."
@@ -42,83 +163,141 @@ const RegistrationPage = () => {
     }
   };
 
-  const handleGoogleSignup = () => {
-    // Connect Google OAuth here later
-    console.log("Google signup clicked");
+  // =========================
+  // GOOGLE SIGNUP
+  // =========================
+
+  const handleGoogleSignup = async (credentialResponse) => {
+    setError("");
+    setSuccess("");
+
+    if (!credentialResponse?.credential) {
+      setError("Google authentication failed. Please try again.");
+      return;
+    }
+
+    setGoogleLoading(true);
+
+    try {
+      console.log("Google credential received");
+
+      const response = await api.post("/auth/google", {
+        credential: credentialResponse.credential,
+        role: formData.role,
+      });
+
+      console.log("Google signup response:", response.data);
+
+      const user = response.data.user;
+
+      if (!user) {
+        throw new Error("User information was not returned.");
+      }
+
+      dispatch(setUser(user));
+
+      if (user.role === "VENDOR") {
+        navigate("/vendor/dashboard");
+      } else if (user.role === "SUPER_ADMIN") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Google signup error:", error);
+
+      setError(
+        error.response?.data?.message ||
+          "Unable to sign up with Google. Please try again."
+      );
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
-  return (
-    <div className="min-h-screen bg-white text-slate-900">
-      {/* BACKGROUND */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute left-1/2 top-0 h-80 w-80 -translate-x-1/2 rounded-full bg-teal-100/50 blur-3xl sm:h-96 sm:w-96" />
+  const handleGoogleError = () => {
+    console.error("Google signup failed");
 
-        <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-teal-50/70 blur-3xl" />
+    setError(
+      "Google sign-up was cancelled or failed. Please try again."
+    );
+  };
+
+  // =========================
+  // INPUT STYLES
+  // =========================
+
+  const inputBase =
+    "w-full rounded-2xl border bg-white/80 px-4 py-3.5 pl-12 text-sm text-slate-900 outline-none backdrop-blur-xl transition-all duration-200 placeholder:text-slate-400";
+
+  const normalInput =
+    "border-slate-300 hover:border-teal-300 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10";
+
+  const errorInput =
+    "border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10";
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-[#b2dfdb] text-slate-900">
+
+      {/* ================= BACKGROUND ================= */}
+
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+
+        <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-teal-200/30 blur-3xl" />
+
+        <div className="absolute right-[-120px] top-20 h-[420px] w-[420px] rounded-full bg-cyan-200/25 blur-3xl" />
+
+        <div className="absolute bottom-[-180px] left-1/3 h-[420px] w-[420px] rounded-full bg-violet-200/20 blur-3xl" />
+
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.95),transparent_55%)]" />
+
       </div>
 
-      {/* NAVBAR */}
+      {/* ================= NAVBAR ================= */}
+
       <header className="relative z-10 px-4 pt-4 sm:px-6 lg:px-8">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-xl sm:px-5">
+
+        <nav className="mx-auto flex max-w-6xl items-center justify-between rounded-2xl border border-white/80 bg-white/75 px-4 py-3 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-2xl sm:px-5">
+
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-600 text-white shadow-sm">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                className="h-5 w-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 7H6"
-                />
-                <circle cx="10" cy="20" r="1" />
-                <circle cx="18" cy="20" r="1" />
-              </svg>
+
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white shadow-md shadow-teal-500/20">
+
+              <BuildingStorefrontIcon className="h-5 w-5" />
+
             </div>
 
-            <span className="text-lg font-semibold tracking-tight">
+            <span className="text-lg font-bold tracking-tight text-slate-900">
               Market<span className="text-teal-600">Hub</span>
             </span>
+
           </Link>
 
           <Link
             to="/login"
-            className="rounded-xl border border-slate-200 bg-white/70 px-4 py-2.5 text-sm font-medium text-slate-700 backdrop-blur-md transition hover:border-teal-200 hover:text-teal-600"
+            className="rounded-xl border border-slate-200/90 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-teal-300 hover:bg-teal-50 hover:text-teal-700"
           >
             Login
           </Link>
+
         </nav>
+
       </header>
 
-      {/* REGISTER */}
+      {/* ================= MAIN ================= */}
+
       <main className="relative z-10 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+
         <div className="w-full max-w-md">
+
           {/* HEADER */}
+
           <div className="mb-8 text-center">
-            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-teal-100 bg-teal-50/70 text-teal-600 backdrop-blur-xl">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                className="h-6 w-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
-                />
-                <circle cx="9" cy="7" r="4" />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 8v6M22 11h-6"
-                />
-              </svg>
+
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-teal-200/70 bg-gradient-to-br from-teal-50 to-cyan-50 text-teal-600 shadow-sm shadow-teal-200/40">
+
+              <UserPlusIcon className="h-7 w-7" />
+
             </div>
 
             <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
@@ -126,283 +305,331 @@ const RegistrationPage = () => {
             </h1>
 
             <p className="mt-3 text-sm leading-6 text-slate-500">
-              Join MarketHub and get started in just a few steps.
+              Join MarketHub and start your journey today.
             </p>
+
           </div>
 
-          {/* FORM CARD */}
-          <div className="rounded-3xl border border-slate-200/80 bg-white/70 p-6 shadow-xl shadow-slate-200/40 backdrop-blur-2xl sm:p-8">
+          {/* CARD */}
+
+          <div className="rounded-[2rem] border border-white/90 bg-white/70 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.10)] backdrop-blur-2xl sm:p-8">
+
             {/* ERROR */}
+
             {error && (
-              <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-                {error}
+              <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50/90 px-4 py-3.5 text-sm text-red-600">
+
+                <ExclamationCircleIcon className="mt-0.5 h-5 w-5 shrink-0" />
+
+                <span>{error}</span>
+
+              </div>
+            )}
+
+            {/* SUCCESS */}
+
+            {success && (
+              <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50/90 px-4 py-4 text-sm text-emerald-700">
+
+                <div className="flex items-start gap-3">
+
+                  <CheckCircleIcon className="mt-0.5 h-5 w-5 shrink-0" />
+
+                  <div>
+                    <p className="font-semibold">
+                      Account created successfully
+                    </p>
+
+                    <p className="mt-1 leading-6">
+                      {success}
+                    </p>
+
+                    <Link
+                      to="/login"
+                      className="mt-3 inline-block font-bold text-emerald-700 underline underline-offset-2 hover:text-emerald-800"
+                    >
+                      Continue to Login
+                    </Link>
+                  </div>
+
+                </div>
+
               </div>
             )}
 
             {/* GOOGLE */}
-            <button
-              type="button"
-              onClick={handleGoogleSignup}
-              className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-teal-200 hover:bg-teal-50/30 hover:text-slate-900"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill="#4285F4"
-                  d="M21.35 12.27c0-.72-.06-1.41-.18-2.07H12v3.92h5.24a4.48 4.48 0 0 1-1.95 2.94v2.44h3.15c1.85-1.7 2.91-4.2 2.91-7.23Z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 21.75c2.64 0 4.86-.87 6.48-2.35l-3.15-2.44c-.87.58-1.98.93-3.33.93-2.56 0-4.73-1.73-5.51-4.05H3.24v2.52A9.79 9.79 0 0 0 12 21.75Z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M6.49 13.84A5.89 5.89 0 0 1 6.18 12c0-.64.11-1.27.31-1.84V7.64H3.24A9.76 9.76 0 0 0 2.25 12c0 1.57.38 3.05.99 4.36l3.25-2.52Z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 6.11c1.44 0 2.73.49 3.75 1.46l2.81-2.81C16.86 3.18 14.64 2.25 12 2.25a9.79 9.79 0 0 0-8.76 5.39l3.25 2.52C7.27 7.84 9.44 6.11 12 6.11Z"
-                />
-              </svg>
 
-              Sign up with Google
-            </button>
+            <div className="relative flex min-h-[44px] w-full justify-center overflow-hidden rounded-2xl">
+
+              {googleLoading && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/90 backdrop-blur-sm">
+
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
+
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-teal-600" />
+
+                    Signing up with Google...
+
+                  </div>
+
+                </div>
+              )}
+
+              <GoogleLogin
+                onSuccess={handleGoogleSignup}
+                onError={handleGoogleError}
+                theme="outline"
+                shape="rectangular"
+                size="large"
+                text="signup_with"
+                width="100%"
+              />
+
+            </div>
 
             {/* DIVIDER */}
+
             <div className="my-6 flex items-center gap-4">
-              <div className="h-px flex-1 bg-slate-200" />
-              <span className="text-xs font-medium text-slate-400">
+
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
+
+              <span className="text-[11px] font-bold tracking-widest text-slate-400">
                 OR
               </span>
-              <div className="h-px flex-1 bg-slate-200" />
+
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
+
             </div>
 
             {/* FORM */}
+
             <form onSubmit={handleSubmit} className="space-y-5">
+
               {/* NAME */}
+
               <div>
+
                 <label
                   htmlFor="name"
-                  className="mb-2 block text-sm font-medium text-slate-700"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
                 >
                   Full name
                 </label>
 
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Enter your name"
-                  required
-                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-                />
+                <div className="relative">
+
+                  <UserIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Enter your full name"
+                    className={`${inputBase} ${
+                      errors.name ? errorInput : normalInput
+                    }`}
+                  />
+
+                </div>
+
+                {errors.name && (
+                  <p className="mt-2 text-xs font-medium text-red-500">
+                    {errors.name}
+                  </p>
+                )}
+
               </div>
 
               {/* EMAIL */}
+
               <div>
+
                 <label
                   htmlFor="email"
-                  className="mb-2 block text-sm font-medium text-slate-700"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
                 >
                   Email address
                 </label>
 
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="you@example.com"
-                  required
-                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-                />
+                <div className="relative">
+
+                  <EnvelopeIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="you@example.com"
+                    className={`${inputBase} ${
+                      errors.email ? errorInput : normalInput
+                    }`}
+                  />
+
+                </div>
+
+                {errors.email && (
+                  <p className="mt-2 text-xs font-medium text-red-500">
+                    {errors.email}
+                  </p>
+                )}
+
               </div>
 
               {/* PASSWORD */}
+
               <div>
+
                 <label
                   htmlFor="password"
-                  className="mb-2 block text-sm font-medium text-slate-700"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
                 >
                   Password
                 </label>
 
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Create a strong password"
-                  required
-                  minLength={6}
-                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-                />
+                <div className="relative">
 
-                <p className="mt-2 text-xs text-slate-400">
-                  Password must contain at least 6 characters.
-                </p>
+                  <LockClosedIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Create a strong password"
+                    className={`${inputBase} pr-12 ${
+                      errors.password ? errorInput : normalInput
+                    }`}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-teal-600"
+                  >
+                    {showPassword ? (
+                      <EyeSlashIcon className="h-5 w-5" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5" />
+                    )}
+                  </button>
+
+                </div>
+
+                {errors.password ? (
+                  <p className="mt-2 text-xs font-medium text-red-500">
+                    {errors.password}
+                  </p>
+                ) : (
+                  <p className="mt-2 text-xs text-slate-400">
+                    8+ characters with uppercase, lowercase, number & symbol.
+                  </p>
+                )}
+
               </div>
 
               {/* ROLE */}
+
               <div>
+
                 <label
                   htmlFor="role"
-                  className="mb-2 block text-sm font-medium text-slate-700"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
                 >
                   Account type
                 </label>
 
-                <select
-                  id="role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  className="w-full appearance-none rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-                >
-                  <option value="CUSTOMER">Customer</option>
-                  <option value="VENDOR">Vendor</option>
-                </select>
+                <div className="relative">
 
-                <p className="mt-2 text-xs text-slate-400">
-                  Choose Customer to shop or Vendor to manage your store.
-                </p>
+                  <BuildingStorefrontIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+
+                  <select
+                    id="role"
+                    name="role"
+                    value={formData.role}
+                    onChange={handleChange}
+                    className={`${inputBase} appearance-none cursor-pointer pl-12 font-medium ${
+                      errors.role
+                        ? errorInput
+                        : `${normalInput}`
+                    }`}
+                  >
+                    <option value="CUSTOMER">
+                      Customer
+                    </option>
+
+                    <option value="VENDOR">
+                      Vendor
+                    </option>
+                  </select>
+
+                  <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                    ▼
+                  </div>
+
+                </div>
+
+                {errors.role ? (
+                  <p className="mt-2 text-xs font-medium text-red-500">
+                    {errors.role}
+                  </p>
+                ) : (
+                  <p className="mt-2 text-xs text-slate-400">
+                    Customer to shop or Vendor to manage your store.
+                  </p>
+                )}
+
               </div>
 
-              {/* REGISTER BUTTON */}
+              {/* BUTTON */}
+
               <button
                 type="submit"
-                disabled={loading}
-                className="flex w-full items-center justify-center rounded-xl bg-teal-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-teal-600/15 transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={loading || googleLoading}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-teal-600/20 transition hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {loading ? "Creating account..." : "Create account"}
+
+                <UserPlusIcon className="h-5 w-5" />
+
+                {loading
+                  ? "Creating account..."
+                  : "Create account"}
+
               </button>
+
             </form>
 
             {/* LOGIN */}
+
             <p className="mt-7 text-center text-sm text-slate-500">
+
               Already have an account?{" "}
+
               <Link
                 to="/login"
-                className="font-semibold text-teal-600 transition hover:text-teal-700"
+                className="font-bold text-teal-600 transition hover:text-teal-700"
               >
                 Login here
               </Link>
+
             </p>
+
           </div>
 
           <p className="mt-6 text-center text-xs text-slate-400">
             By creating an account, you agree to our terms and privacy policy.
           </p>
+
         </div>
+
       </main>
+
     </div>
   );
 };
 
 export default RegistrationPage;
-
-
-
-
-// import { useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import api from "../services/api";
-
-// const RegistrationPage = () => {
-//   const [formData, setFormData] = useState({ name:"", email: "", password: "", role: "customer" });
-//   const navigate = useNavigate();
-
-//   const onChangeInput = (event) => {
-//     setFormData({ ...formData, [event.target.name]: event.target.value });
-//   };
-
-//   const handleSubmit = async (e) => {
-//     console.log(formData)
-//     e.preventDefault();
-//     try {
-//       const response = await api.post("/auth/register", formData);
-//       console.log(response);
-//       navigate("/login"); 
-//     } catch (error) {
-//       console.error(error.message);
-//     }
-//   };
-
-//   const handleGoogleSignup = () => {
-//     window.location.href = "/auth/google"; // Adjust backend route
-//   };
-
-//   return (
-//     <div className="min-h-screen flex items-center justify-center p-6">
-//       <div className="glass-card w-full max-w-md p-8">
-//         <h2 className="text-2xl font-bold mb-6 text-center">Create Account</h2>
-//         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-//           <input
-//             type="name"
-//             name="name"
-//             placeholder="Name"
-//             className="glass-input"
-//             value={formData.name}
-//             onChange={onChangeInput}
-//           />
-//           <input
-//             type="email"
-//             name="email"
-//             placeholder="Email"
-//             className="glass-input"
-//             value={formData.email}
-//             onChange={onChangeInput}
-//           />
-//           <input
-//             type="password"
-//             name="password"
-//             placeholder="Password"
-//             className="glass-input"
-//             value={formData.password}
-//             onChange={onChangeInput}
-//           />
-//           <select
-//             name="role"
-//             className="glass-input"
-//             value={formData.role}
-//             onChange={onChangeInput}
-//           >
-//             <option value="VENDOR">Vendor</option>
-//             <option value="CUSTOMER">Customer</option>
-//           </select>
-
-//           <button type="submit" className="glass-btn mt-4">
-//             Register
-//           </button>
-//         </form>
-
-//         <button
-//           onClick={handleGoogleSignup}
-//           className="glass-btn mt-4 flex items-center justify-center gap-2"
-//         >
-//           <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
-//           Sign up with Google
-//         </button>
-
-//         <p className="mt-6 text-center text-gray-600">
-//           Already have an account?{" "}
-//           <button
-//             className="text-pink-500 hover:underline"
-//             onClick={() => navigate("/login")}
-//           >
-//             Login
-//           </button>
-//         </p>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default RegistrationPage;

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../store/authSlice";
+import { logout } from "../../redux/authSlice";
 import api from "../../services/api";
 
 const CustomerHeader = () => {
