@@ -5,8 +5,8 @@ import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import StorePage from "./pages/StorePage";
 import ProductDetails from "./pages/ProductDetails";
-import CartPage from "./pages/CartPage";
-import CheckoutPage from "./pages/CheckoutPage";
+import CartPage from "./pages/customer/CartPage";
+import CheckoutPage from "./pages/customer/CheckoutPage";
 import OrderSuccess from "./pages/OrderSuccess";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
 import VendorProducts from "./pages/vendor/VendorProducts";
@@ -20,7 +20,7 @@ import OrderDetails from "./pages/customer/OrderDetails";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageAddresses from "./pages/customer/ManageAddresses";
 import AccountInformation from "./pages/customer/AccountInformation";
-
+import AllStores from "./pages/admin/AllStores";
 
 
 const App = () => {
@@ -29,7 +29,7 @@ const App = () => {
         <Route path="/register" element = {<RegistrationPage/>}/>
         <Route path="/login" element = {<LoginPage/>}/>
         <Route path="/" element = {<HomePage/>}/>
-        <Route path="/store/:slug" element={<StorePage />}/>
+        <Route path="/stores/:slug" element={<StorePage />}/>
         <Route path="/product/:productId" element={<ProductDetails />}/>
         <Route path="/cart" element={<CartPage/>}/>
         <Route path="/checkout" element={<CheckoutPage/>}/>
@@ -46,6 +46,7 @@ const App = () => {
         <Route path="/admin/dashboard" element = {<AdminDashboard/>}/>
         <Route path="/manage-addresses" element={<ManageAddresses />}/>
         <Route path="/account-information" element={<AccountInformation />}/>
+        <Route path = "/stores" element = {<AllStores/>}/>
       </Routes>
   )
 }

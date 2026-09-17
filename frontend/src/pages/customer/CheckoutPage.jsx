@@ -3,9 +3,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { ShieldCheckIcon } from "@heroicons/react/24/outline";
 
-import api from "../services/api";
-import { clearCart } from "../store/cartSlice";
-import CustomerHeader from "./customer/CustomerHeader";
+import api from "../../services/api";
+import { clearCart } from "../../store/cartSlice";
+import CustomerHeader from "./CustomerHeader";
 
 // LOAD RAZORPAY SCRIPT
 const loadRazorpay = () => {

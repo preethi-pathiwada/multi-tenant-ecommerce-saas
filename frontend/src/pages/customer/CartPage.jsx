@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
-import {removeFromCart, clearCart, increaseQuantity, decreaseQuantity} from "../store/cartSlice";
-import CustomerHeader from "./customer/CustomerHeader";
+import {removeFromCart, clearCart, increaseQuantity, decreaseQuantity} from "../../store/cartSlice"
+import CustomerHeader from "./CustomerHeader";
 import { useNavigate } from "react-router-dom";
 
 const CartPage = () => {
