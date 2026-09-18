@@ -19,7 +19,7 @@ const storeSchema = new mongoose.Schema({
         ref:"User",
         required:true
     }
-}, {timeStamps: true});
+}, {timestamps: true});
 
 const Store = mongoose.model("Store", storeSchema);
 export default Store;

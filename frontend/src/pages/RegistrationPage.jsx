@@ -1,9 +1,13 @@
 import React, { useState } from "react";
+
 import { Link, useNavigate } from "react-router-dom";
+
 import { useDispatch } from "react-redux";
+
 import { GoogleLogin } from "@react-oauth/google";
 
 import api from "../services/api";
+
 import { setUser } from "../redux/authSlice";
 
 import {
@@ -45,9 +49,11 @@ const RegistrationPage = () => {
 
     const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ' -]{2,}$/;
 
-    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+    const emailRegex =
+      /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
     // NAME
+
     if (!formData.name.trim()) {
       newErrors.name = "Please enter your full name.";
     } else if (!nameRegex.test(formData.name.trim())) {
@@ -55,6 +61,7 @@ const RegistrationPage = () => {
     }
 
     // EMAIL
+
     if (!formData.email.trim()) {
       newErrors.email = "Please enter your email address.";
     } else if (!emailRegex.test(formData.email.trim())) {
@@ -62,6 +69,7 @@ const RegistrationPage = () => {
     }
 
     // PASSWORD
+
     if (!formData.password) {
       newErrors.password = "Please create a password.";
     } else if (formData.password.length < 8) {
@@ -82,6 +90,7 @@ const RegistrationPage = () => {
     }
 
     // ROLE
+
     if (!["CUSTOMER", "VENDOR"].includes(formData.role)) {
       newErrors.role = "Please select a valid account type.";
     }
@@ -215,6 +224,10 @@ const RegistrationPage = () => {
     }
   };
 
+  // =========================
+  // GOOGLE ERROR
+  // =========================
+
   const handleGoogleError = () => {
     console.error("Google signup failed");
 
@@ -228,54 +241,57 @@ const RegistrationPage = () => {
   // =========================
 
   const inputBase =
-    "w-full rounded-2xl border bg-white/80 px-4 py-3.5 pl-12 text-sm text-slate-900 outline-none backdrop-blur-xl transition-all duration-200 placeholder:text-slate-400";
+    "w-full rounded-xl border bg-white/65 px-4 py-3.5 pl-11 text-sm text-slate-900 outline-none backdrop-blur-xl transition-all duration-200 placeholder:text-slate-400";
 
   const normalInput =
-    "border-slate-300 hover:border-teal-300 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10";
+    "border-slate-200/80 hover:border-teal-300 focus:border-teal-500 focus:bg-white/90 focus:ring-4 focus:ring-teal-500/10";
 
   const errorInput =
-    "border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10";
+    "border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10";
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#b2dfdb] text-slate-900">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-100 via-cyan-50/50 to-teal-50/70 text-slate-900">
 
       {/* ================= BACKGROUND ================= */}
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
 
-        <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-teal-200/30 blur-3xl" />
+        <div className="absolute -left-32 -top-32 h-[420px] w-[420px] rounded-full bg-teal-300/20 blur-3xl" />
 
-        <div className="absolute right-[-120px] top-20 h-[420px] w-[420px] rounded-full bg-cyan-200/25 blur-3xl" />
+        <div className="absolute right-[-140px] top-20 h-[480px] w-[480px] rounded-full bg-cyan-300/20 blur-3xl" />
 
-        <div className="absolute bottom-[-180px] left-1/3 h-[420px] w-[420px] rounded-full bg-violet-200/20 blur-3xl" />
+        <div className="absolute bottom-[-200px] left-1/3 h-[450px] w-[450px] rounded-full bg-blue-300/15 blur-3xl" />
 
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.95),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.9),transparent_58%)]" />
 
       </div>
 
       {/* ================= NAVBAR ================= */}
 
-      <header className="relative z-10 px-4 pt-4 sm:px-6 lg:px-8">
+      <header className="relative z-10 px-3 pt-3 sm:px-5 lg:px-6">
 
-        <nav className="mx-auto flex max-w-6xl items-center justify-between rounded-2xl border border-white/80 bg-white/75 px-4 py-3 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-2xl sm:px-5">
+        <nav className="mx-auto flex min-h-[50px] max-w-6xl items-center justify-between rounded-2xl border border-white/75 bg-white/45 px-3 py-2 shadow-md shadow-slate-200/30 backdrop-blur-xl sm:px-4">
 
-          <Link to="/" className="flex items-center gap-2.5">
+          {/* LOGO */}
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white shadow-md shadow-teal-500/20">
-
-              <BuildingStorefrontIcon className="h-5 w-5" />
-
+          <Link
+            to="/"
+            className="flex items-center gap-2.5"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 via-cyan-500 to-blue-500 text-white shadow-sm shadow-cyan-200/60">
+              <BuildingStorefrontIcon className="h-4.5 w-4.5" />
             </div>
 
-            <span className="text-lg font-bold tracking-tight text-slate-900">
-              Market<span className="text-teal-600">Hub</span>
+            <span className="text-sm font-black tracking-tight text-slate-800 sm:text-base">
+              Orbi<span className="text-teal-600">Kart</span>
             </span>
-
           </Link>
+
+          {/* LOGIN */}
 
           <Link
             to="/login"
-            className="rounded-xl border border-slate-200/90 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-teal-300 hover:bg-teal-50 hover:text-teal-700"
+            className="rounded-xl border border-white/80 bg-white/65 px-3.5 py-2 text-xs font-bold text-slate-700 transition-all duration-300 hover:border-teal-200 hover:bg-white hover:text-teal-700 sm:px-4 sm:text-sm"
           >
             Login
           </Link>
@@ -286,57 +302,54 @@ const RegistrationPage = () => {
 
       {/* ================= MAIN ================= */}
 
-      <main className="relative z-10 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+      <main className="relative z-10 flex items-center justify-center px-4 py-9 sm:px-6 sm:py-11">
 
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-[430px]">
 
           {/* HEADER */}
 
-          <div className="mb-8 text-center">
+          <div className="mb-7 text-center">
 
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-teal-200/70 bg-gradient-to-br from-teal-50 to-cyan-50 text-teal-600 shadow-sm shadow-teal-200/40">
-
-              <UserPlusIcon className="h-7 w-7" />
-
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/80 bg-gradient-to-br from-teal-500/10 to-cyan-500/10 text-teal-600 shadow-sm shadow-teal-200/40 backdrop-blur-xl">
+              <UserPlusIcon className="h-6 w-6" />
             </div>
 
-            <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+            <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-[2.15rem]">
               Create your account
             </h1>
 
-            <p className="mt-3 text-sm leading-6 text-slate-500">
-              Join MarketHub and start your journey today.
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Join OrbiKart and start your journey today.
             </p>
 
           </div>
 
           {/* CARD */}
 
-          <div className="rounded-[2rem] border border-white/90 bg-white/70 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.10)] backdrop-blur-2xl sm:p-8">
+          <div className="rounded-[1.75rem] border border-white/80 bg-white/60 p-5 shadow-xl shadow-slate-300/20 backdrop-blur-2xl sm:p-7">
 
             {/* ERROR */}
 
             {error && (
-              <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50/90 px-4 py-3.5 text-sm text-red-600">
-
+              <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200/80 bg-red-50/80 px-4 py-3 text-sm text-red-600 backdrop-blur-sm">
                 <ExclamationCircleIcon className="mt-0.5 h-5 w-5 shrink-0" />
 
                 <span>{error}</span>
-
               </div>
             )}
 
             {/* SUCCESS */}
 
             {success && (
-              <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50/90 px-4 py-4 text-sm text-emerald-700">
+              <div className="mb-5 rounded-xl border border-emerald-200/80 bg-emerald-50/80 px-4 py-3.5 text-sm text-emerald-700 backdrop-blur-sm">
 
                 <div className="flex items-start gap-3">
 
                   <CheckCircleIcon className="mt-0.5 h-5 w-5 shrink-0" />
 
                   <div>
-                    <p className="font-semibold">
+
+                    <p className="font-bold">
                       Account created successfully
                     </p>
 
@@ -346,10 +359,11 @@ const RegistrationPage = () => {
 
                     <Link
                       to="/login"
-                      className="mt-3 inline-block font-bold text-emerald-700 underline underline-offset-2 hover:text-emerald-800"
+                      className="mt-2.5 inline-block font-bold text-emerald-700 underline underline-offset-2 hover:text-emerald-800"
                     >
                       Continue to Login
                     </Link>
+
                   </div>
 
                 </div>
@@ -359,10 +373,10 @@ const RegistrationPage = () => {
 
             {/* GOOGLE */}
 
-            <div className="relative flex min-h-[44px] w-full justify-center overflow-hidden rounded-2xl">
+            <div className="relative flex min-h-[44px] w-full justify-center overflow-hidden rounded-xl">
 
               {googleLoading && (
-                <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/90 backdrop-blur-sm">
+                <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/90 backdrop-blur-sm">
 
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
 
@@ -389,11 +403,11 @@ const RegistrationPage = () => {
 
             {/* DIVIDER */}
 
-            <div className="my-6 flex items-center gap-4">
+            <div className="my-5 flex items-center gap-3">
 
               <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
 
-              <span className="text-[11px] font-bold tracking-widest text-slate-400">
+              <span className="text-[10px] font-black tracking-[0.2em] text-slate-400">
                 OR
               </span>
 
@@ -403,7 +417,7 @@ const RegistrationPage = () => {
 
             {/* FORM */}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
 
               {/* NAME */}
 
@@ -411,14 +425,14 @@ const RegistrationPage = () => {
 
                 <label
                   htmlFor="name"
-                  className="mb-2 block text-sm font-semibold text-slate-700"
+                  className="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-slate-600"
                 >
                   Full name
                 </label>
 
                 <div className="relative">
 
-                  <UserIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                  <UserIcon className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
                   <input
                     id="name"
@@ -435,7 +449,7 @@ const RegistrationPage = () => {
                 </div>
 
                 {errors.name && (
-                  <p className="mt-2 text-xs font-medium text-red-500">
+                  <p className="mt-1.5 text-xs font-medium text-red-500">
                     {errors.name}
                   </p>
                 )}
@@ -448,14 +462,14 @@ const RegistrationPage = () => {
 
                 <label
                   htmlFor="email"
-                  className="mb-2 block text-sm font-semibold text-slate-700"
+                  className="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-slate-600"
                 >
                   Email address
                 </label>
 
                 <div className="relative">
 
-                  <EnvelopeIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                  <EnvelopeIcon className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
                   <input
                     id="email"
@@ -472,7 +486,7 @@ const RegistrationPage = () => {
                 </div>
 
                 {errors.email && (
-                  <p className="mt-2 text-xs font-medium text-red-500">
+                  <p className="mt-1.5 text-xs font-medium text-red-500">
                     {errors.email}
                   </p>
                 )}
@@ -485,14 +499,14 @@ const RegistrationPage = () => {
 
                 <label
                   htmlFor="password"
-                  className="mb-2 block text-sm font-semibold text-slate-700"
+                  className="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-slate-600"
                 >
                   Password
                 </label>
 
                 <div className="relative">
 
-                  <LockClosedIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                  <LockClosedIcon className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
                   <input
                     id="password"
@@ -508,8 +522,10 @@ const RegistrationPage = () => {
 
                   <button
                     type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-teal-600"
+                    onClick={() =>
+                      setShowPassword((prev) => !prev)
+                    }
+                    className="absolute right-2.5 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-teal-50 hover:text-teal-600"
                   >
                     {showPassword ? (
                       <EyeSlashIcon className="h-5 w-5" />
@@ -521,11 +537,11 @@ const RegistrationPage = () => {
                 </div>
 
                 {errors.password ? (
-                  <p className="mt-2 text-xs font-medium text-red-500">
+                  <p className="mt-1.5 text-xs font-medium text-red-500">
                     {errors.password}
                   </p>
                 ) : (
-                  <p className="mt-2 text-xs text-slate-400">
+                  <p className="mt-1.5 text-[11px] leading-5 text-slate-400">
                     8+ characters with uppercase, lowercase, number & symbol.
                   </p>
                 )}
@@ -538,26 +554,27 @@ const RegistrationPage = () => {
 
                 <label
                   htmlFor="role"
-                  className="mb-2 block text-sm font-semibold text-slate-700"
+                  className="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-slate-600"
                 >
                   Account type
                 </label>
 
                 <div className="relative">
 
-                  <BuildingStorefrontIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                  <BuildingStorefrontIcon className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
                   <select
                     id="role"
                     name="role"
                     value={formData.role}
                     onChange={handleChange}
-                    className={`${inputBase} appearance-none cursor-pointer pl-12 font-medium ${
+                    className={`${inputBase} appearance-none cursor-pointer pl-11 font-medium ${
                       errors.role
                         ? errorInput
-                        : `${normalInput}`
+                        : normalInput
                     }`}
                   >
+
                     <option value="CUSTOMER">
                       Customer
                     </option>
@@ -565,20 +582,21 @@ const RegistrationPage = () => {
                     <option value="VENDOR">
                       Vendor
                     </option>
+
                   </select>
 
-                  <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                  <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400">
                     ▼
                   </div>
 
                 </div>
 
                 {errors.role ? (
-                  <p className="mt-2 text-xs font-medium text-red-500">
+                  <p className="mt-1.5 text-xs font-medium text-red-500">
                     {errors.role}
                   </p>
                 ) : (
-                  <p className="mt-2 text-xs text-slate-400">
+                  <p className="mt-1.5 text-[11px] leading-5 text-slate-400">
                     Customer to shop or Vendor to manage your store.
                   </p>
                 )}
@@ -590,7 +608,7 @@ const RegistrationPage = () => {
               <button
                 type="submit"
                 disabled={loading || googleLoading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-teal-600/20 transition hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-cyan-600/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-cyan-500/25 disabled:cursor-not-allowed disabled:opacity-60"
               >
 
                 <UserPlusIcon className="h-5 w-5" />
@@ -605,7 +623,7 @@ const RegistrationPage = () => {
 
             {/* LOGIN */}
 
-            <p className="mt-7 text-center text-sm text-slate-500">
+            <p className="mt-6 text-center text-sm text-slate-500">
 
               Already have an account?{" "}
 
@@ -620,7 +638,7 @@ const RegistrationPage = () => {
 
           </div>
 
-          <p className="mt-6 text-center text-xs text-slate-400">
+          <p className="mt-5 text-center text-[11px] leading-5 text-slate-400">
             By creating an account, you agree to our terms and privacy policy.
           </p>
 

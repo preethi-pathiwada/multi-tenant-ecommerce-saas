@@ -23,6 +23,15 @@ import AccountInformation from "./pages/customer/AccountInformation";
 import AllStores from "./pages/admin/AllStores";
 import VerifyEmailPage from "./pages/verifyEmailPage";
 import CreateStore from "./pages/vendor/CreateStore";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminVendors from "./pages/admin/AdminVendors";
+import AdminCustomers from "./pages/admin/AdminCustomers";
+import AdminStores from "./pages/admin/AdminStores";
+import AdminStoreDetails from "./pages/admin/AdminStoreDetails";
+import AdminProducts from "./pages/admin/AdminProducts";
+import AdminProductDetails from "./pages/admin/AdminProductDetails";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
 
 
 const App = () => {
@@ -51,6 +60,15 @@ const App = () => {
         <Route path="/account-information" element={<AccountInformation />}/>
         <Route path = "/stores" element = {<AllStores/>}/>
         <Route path="/verify-email/:token" element={<VerifyEmailPage />}/>
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/vendors" element={<AdminVendors />}/>
+        <Route path="/admin/customers" element={<AdminCustomers />}/>
+        <Route path="/admin/stores" element={<AdminStores />}/>
+         <Route path="/admin/stores/:id"element={<AdminStoreDetails />}/>
+        <Route path="/admin/products/"element={<AdminProducts />}/>
+        <Route path="/admin/products/:id"element={<AdminProductDetails />}/>
+        <Route path="/admin/orders/"element={<AdminOrders />}/>
+        <Route path="/admin/orders/:id"element={<AdminOrderDetails />}/>
       </Routes>
   )
 }
