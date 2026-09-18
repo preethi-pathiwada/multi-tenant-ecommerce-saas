@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import api from "../../services/api";
+import AdminHeader from "./AdminHeader";
 
 import {
   UsersIcon,
@@ -46,21 +47,7 @@ const AdminDashboard = () => {
     }
   };
 
-  /*
-   * Supports both:
-   *
-   * {
-   *   stats: {...}
-   * }
-   *
-   * and the older flat response:
-   *
-   * {
-   *   totalVendors,
-   *   totalCustomers,
-   *   ...
-   * }
-   */
+  
   const stats = dashboard?.stats || {
     totalRevenue: dashboard?.totalRevenue || 0,
     totalOrders: dashboard?.totalOrders || 0,
@@ -193,6 +180,8 @@ const AdminDashboard = () => {
 
         <div className="absolute -bottom-40 left-1/3 h-[28rem] w-[28rem] rounded-full bg-teal-300/20 blur-3xl" />
       </div>
+
+      <AdminHeader/>
 
       <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
@@ -443,7 +432,7 @@ const AdminDashboard = () => {
                 </p>
 
                 <h2 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">
-                  MarketHub
+                  OrbiKart
                 </h2>
               </div>
 
@@ -771,7 +760,7 @@ const AdminDashboard = () => {
         <footer className="py-9 text-center">
 
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
-            MarketHub Platform Administration
+            OrbiKart Platform Administration
           </p>
 
         </footer>

@@ -260,7 +260,7 @@ const VendorOrders = () => {
             <div className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/75 px-6 py-16 text-center shadow-lg shadow-slate-200/40 backdrop-blur-xl">
               <div className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-teal-300/10 blur-3xl" />
 
-              <div className="relative">
+              <div className="relative flex flex-col items-center">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-500 text-2xl text-white shadow-lg shadow-teal-200/60">
                   📦
                 </div>

@@ -14,6 +14,7 @@ import {
 } from "react-icons/fi";
 
 import api from "../../services/api";
+import AdminHeader from "./AdminHeader";
 
 
 const formatDate = (date) => {
@@ -238,6 +239,7 @@ const AdminOrders = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50/40 to-teal-50/50 px-4 py-8 sm:px-6 lg:px-8">
+        <AdminHeader/>
 
       <div className="mx-auto max-w-7xl">
 

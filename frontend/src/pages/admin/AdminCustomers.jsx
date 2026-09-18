@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import api from "../../services/api";
+import AdminHeader from "./AdminHeader";
 
 import {
   UsersIcon,
@@ -195,7 +196,7 @@ const AdminCustomers = () => {
         <div className="absolute -bottom-40 left-1/3 h-[28rem] w-[28rem] rounded-full bg-teal-300/10 blur-3xl" />
 
       </div>
-
+        <AdminHeader/>
 
       <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
