@@ -1,8 +1,6 @@
 # Multi-Tenant E-Commerce Platform (SaaS)
 
-Live link : https://multi-tenant-ecommerce-saas-694d03os1-npte.vercel.app/
-
-https://multi-tenant-ecommerce-saas-xi.vercel.app/
+Live link : https://6aad8d8e0d26a5708cd4a38f--orbikart.netlify.app/
 
 # High-Level Application Flow
 
