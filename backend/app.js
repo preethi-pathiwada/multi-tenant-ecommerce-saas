@@ -18,7 +18,7 @@ app.use(helmet());
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://multi-tenant-ecommerce-saas-xi.vercel.app/",
+  "https://multi-tenant-ecommerce-saas-xi.vercel.app",
 ];
 
 app.use(
