@@ -21,7 +21,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageAddresses from "./pages/customer/ManageAddresses";
 import AccountInformation from "./pages/customer/AccountInformation";
 import AllStores from "./pages/admin/AllStores";
-import VerifyEmailPage from "./pages/verifyEmailPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 import CreateStore from "./pages/vendor/CreateStore";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminVendors from "./pages/admin/AdminVendors";
