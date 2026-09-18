@@ -1,9 +1,13 @@
 import React, { useState } from "react";
+
 import { Link, useNavigate } from "react-router-dom";
+
 import { useDispatch } from "react-redux";
+
 import { GoogleLogin } from "@react-oauth/google";
 
 import api from "../services/api";
+
 import { setUser } from "../redux/authSlice";
 
 import {
@@ -81,14 +85,45 @@ const LoginPage = () => {
   // ROLE REDIRECT
   // =========================
 
-  const redirectUser = (user) => {
+  const redirectUser = async (user) => {
+    // -------------------------
+    // VENDOR
+    // -------------------------
     if (user.role === "VENDOR") {
-      navigate("/vendor/dashboard");
-    } else if (user.role === "SUPER_ADMIN") {
-      navigate("/admin/dashboard");
-    } else {
-      navigate("/");
+      try {
+        // Check whether this vendor already has a store
+        await api.get("/stores/my-store");
+
+        // Store exists
+        navigate("/vendor/dashboard");
+      } catch (error) {
+        // Store does not exist
+        if (error.response?.status === 404) {
+          navigate("/vendor/create-store");
+        } else {
+          console.error("Store check failed:", error);
+
+          setError(
+            "Unable to check your store information. Please try again."
+          );
+        }
+      }
+
+      return;
     }
+
+    // -------------------------
+    // SUPER ADMIN
+    // -------------------------
+    if (user.role === "SUPER_ADMIN") {
+      navigate("/admin/dashboard");
+      return;
+    }
+
+    // -------------------------
+    // CUSTOMER
+    // -------------------------
+    navigate("/");
   };
 
   // =========================
@@ -120,9 +155,11 @@ const LoginPage = () => {
         throw new Error("User information was not returned.");
       }
 
+      // Save logged-in user
       dispatch(setUser(user));
 
-      redirectUser(user);
+      // Redirect according to role + store status
+      await redirectUser(user);
     } catch (error) {
       console.error("Login error:", error);
 
@@ -164,9 +201,11 @@ const LoginPage = () => {
         throw new Error("User information was not returned.");
       }
 
+      // Save logged-in user
       dispatch(setUser(user));
 
-      redirectUser(user);
+      // Redirect according to role + store status
+      await redirectUser(user);
     } catch (error) {
       console.error("Google login error:", error);
 
@@ -178,6 +217,10 @@ const LoginPage = () => {
       setGoogleLoading(false);
     }
   };
+
+  // =========================
+  // GOOGLE ERROR
+  // =========================
 
   const handleGoogleError = () => {
     console.error("Google login failed");
@@ -206,7 +249,6 @@ const LoginPage = () => {
       {/* ================= BACKGROUND ================= */}
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-
         <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-teal-200/30 blur-3xl" />
 
         <div className="absolute right-[-120px] top-20 h-[420px] w-[420px] rounded-full bg-cyan-200/25 blur-3xl" />
@@ -214,27 +256,21 @@ const LoginPage = () => {
         <div className="absolute bottom-[-180px] left-1/3 h-[420px] w-[420px] rounded-full bg-violet-200/20 blur-3xl" />
 
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.95),transparent_55%)]" />
-
       </div>
 
       {/* ================= NAVBAR ================= */}
 
       <header className="relative z-10 px-4 pt-4 sm:px-6 lg:px-8">
-
         <nav className="mx-auto flex max-w-6xl items-center justify-between rounded-2xl border border-white/80 bg-white/75 px-4 py-3 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-2xl sm:px-5">
 
           <Link to="/" className="flex items-center gap-2.5">
-
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white shadow-md shadow-teal-500/20">
-
               <BuildingStorefrontIcon className="h-5 w-5" />
-
             </div>
 
             <span className="text-lg font-bold tracking-tight text-slate-900">
               Market<span className="text-teal-600">Hub</span>
             </span>
-
           </Link>
 
           <Link
@@ -243,9 +279,7 @@ const LoginPage = () => {
           >
             Create Account
           </Link>
-
         </nav>
-
       </header>
 
       {/* ================= MAIN ================= */}
@@ -257,11 +291,8 @@ const LoginPage = () => {
           {/* HEADER */}
 
           <div className="mb-8 text-center">
-
             <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-teal-200/70 bg-gradient-to-br from-teal-50 to-cyan-50 text-teal-600 shadow-sm shadow-teal-200/40">
-
               <ArrowRightOnRectangleIcon className="h-7 w-7" />
-
             </div>
 
             <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
@@ -271,7 +302,6 @@ const LoginPage = () => {
             <p className="mt-3 text-sm leading-6 text-slate-500">
               Sign in to continue to your MarketHub account.
             </p>
-
           </div>
 
           {/* CARD */}
@@ -282,11 +312,9 @@ const LoginPage = () => {
 
             {error && (
               <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50/90 px-4 py-3.5 text-sm text-red-600">
-
                 <ExclamationCircleIcon className="mt-0.5 h-5 w-5 shrink-0" />
 
                 <span>{error}</span>
-
               </div>
             )}
 
@@ -296,15 +324,10 @@ const LoginPage = () => {
 
               {googleLoading && (
                 <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/90 backdrop-blur-sm">
-
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
-
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-teal-600" />
-
                     Signing in with Google...
-
                   </div>
-
                 </div>
               )}
 
@@ -317,13 +340,11 @@ const LoginPage = () => {
                 text="continue_with"
                 width="100%"
               />
-
             </div>
 
             {/* DIVIDER */}
 
             <div className="my-6 flex items-center gap-4">
-
               <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
 
               <span className="text-[11px] font-bold tracking-widest text-slate-400">
@@ -331,7 +352,6 @@ const LoginPage = () => {
               </span>
 
               <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
-
             </div>
 
             {/* FORM */}
@@ -341,7 +361,6 @@ const LoginPage = () => {
               {/* EMAIL */}
 
               <div>
-
                 <label
                   htmlFor="email"
                   className="mb-2 block text-sm font-semibold text-slate-700"
@@ -350,7 +369,6 @@ const LoginPage = () => {
                 </label>
 
                 <div className="relative">
-
                   <EnvelopeIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
                   <input
@@ -365,7 +383,6 @@ const LoginPage = () => {
                       errors.email ? errorInput : normalInput
                     }`}
                   />
-
                 </div>
 
                 {errors.email && (
@@ -373,26 +390,21 @@ const LoginPage = () => {
                     {errors.email}
                   </p>
                 )}
-
               </div>
 
               {/* PASSWORD */}
 
               <div>
-
                 <div className="mb-2 flex items-center justify-between">
-
                   <label
                     htmlFor="password"
                     className="block text-sm font-semibold text-slate-700"
                   >
                     Password
                   </label>
-
                 </div>
 
                 <div className="relative">
-
                   <LockClosedIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
                   <input
@@ -419,7 +431,6 @@ const LoginPage = () => {
                       <EyeIcon className="h-5 w-5" />
                     )}
                   </button>
-
                 </div>
 
                 {errors.password && (
@@ -427,7 +438,6 @@ const LoginPage = () => {
                     {errors.password}
                   </p>
                 )}
-
               </div>
 
               {/* LOGIN BUTTON */}
@@ -437,42 +447,30 @@ const LoginPage = () => {
                 disabled={loading || googleLoading}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-teal-600/20 transition hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
               >
-
                 <ArrowRightOnRectangleIcon className="h-5 w-5" />
 
-                {loading
-                  ? "Signing in..."
-                  : "Sign in"}
-
+                {loading ? "Signing in..." : "Sign in"}
               </button>
-
             </form>
 
             {/* REGISTER */}
 
             <p className="mt-7 text-center text-sm text-slate-500">
-
               Don't have an account?{" "}
-
               <Link
                 to="/register"
                 className="font-bold text-teal-600 transition hover:text-teal-700"
               >
                 Create one
               </Link>
-
             </p>
-
           </div>
 
           <p className="mt-6 text-center text-xs text-slate-400">
             Secure authentication powered by MarketHub.
           </p>
-
         </div>
-
       </main>
-
     </div>
   );
 };

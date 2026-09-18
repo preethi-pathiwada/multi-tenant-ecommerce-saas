@@ -68,12 +68,12 @@ const CustomerHeader = () => {
               className="group flex items-center gap-3"
             >
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 via-cyan-500 to-blue-500 text-lg font-bold text-white shadow-md shadow-teal-200/60 transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-lg">
-                M
+                O
               </div>
 
               <div className="hidden sm:block">
                 <p className="text-lg font-bold tracking-tight text-slate-900">
-                  Market<span className="text-teal-600">Hub</span>
+                  Obi<span className="text-teal-600">Kart</span>
                 </p>
 
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">

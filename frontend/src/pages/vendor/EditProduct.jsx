@@ -220,16 +220,6 @@ const EditProduct = () => {
       data.append("price", Number(form.price));
       data.append("stock", Number(form.stock));
 
-      // IMAGES
-        // My backend currently replaces all existing images when new files are uploaded.
-
-        // Therefore:
-
-        // - If NO new images are selected, send the remaining existing image URLs.
-
-        // - If NEW images are selected, the backend will replace the images with those newly uploaded files.
-      
-
       if (newImages.length === 0) {
         data.append(
           "images",
@@ -240,10 +230,6 @@ const EditProduct = () => {
           data.append("images", image.file);
         });
       }
-
-      // --------------------------------
-      // VARIANTS
-      // --------------------------------
 
       const formattedVariants = variants.map(
         (variant) => ({
@@ -275,21 +261,20 @@ const EditProduct = () => {
     }
   };
 
-  // --------------------------------
   // LOADING
-  // --------------------------------
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-teal-50/30 to-white px-4 py-10">
+      <div className="min-h-screen overflow-hidden bg-gradient-to-br from-slate-100 via-cyan-50/30 to-teal-50/50 px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
-          <div className="rounded-3xl border border-white bg-white/80 p-8 shadow-sm backdrop-blur-xl">
-            <div className="h-8 w-48 animate-pulse rounded-lg bg-gray-200" />
+          <div className="rounded-3xl border border-white/80 bg-white/75 p-8 shadow-lg shadow-slate-200/40 backdrop-blur-xl">
+            <div className="h-4 w-32 animate-pulse rounded-full bg-teal-100" />
+            <div className="mt-4 h-10 w-52 animate-pulse rounded-xl bg-slate-200" />
 
-            <div className="mt-6 space-y-4">
-              <div className="h-12 animate-pulse rounded-xl bg-gray-100" />
-              <div className="h-32 animate-pulse rounded-xl bg-gray-100" />
-              <div className="h-12 animate-pulse rounded-xl bg-gray-100" />
+            <div className="mt-8 space-y-5">
+              <div className="h-14 animate-pulse rounded-2xl bg-slate-100" />
+              <div className="h-36 animate-pulse rounded-2xl bg-slate-100" />
+              <div className="h-14 animate-pulse rounded-2xl bg-slate-100" />
             </div>
           </div>
         </div>
@@ -298,7 +283,13 @@ const EditProduct = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-teal-50/30 to-white px-4 py-6 sm:px-6 lg:px-8">
+    <div className="min-h-screen overflow-x-hidden bg-gradient-to-br from-slate-100 via-cyan-50/30 to-teal-50/50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
+
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute left-1/4 top-0 h-72 w-72 rounded-full bg-teal-300/15 blur-3xl" />
+        <div className="absolute -right-24 top-40 h-80 w-80 rounded-full bg-cyan-300/15 blur-3xl" />
+        <div className="absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-blue-300/10 blur-3xl" />
+      </div>
 
       <div className="mx-auto max-w-4xl">
 
@@ -307,20 +298,21 @@ const EditProduct = () => {
           <button
             type="button"
             onClick={() => navigate("/vendor/products")}
-            className="mb-4 text-sm font-medium text-teal-600 transition hover:text-teal-700"
+            className="mb-5 inline-flex items-center gap-2 rounded-full border border-teal-200/70 bg-white/70 px-4 py-2 text-sm font-bold text-teal-700 shadow-sm backdrop-blur-xl transition hover:-translate-x-0.5 hover:border-teal-300 hover:bg-white"
           >
             ← Back to Products
           </button>
 
-          <p className="text-xs font-semibold uppercase tracking-widest text-teal-600">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-200/80 bg-white/70 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-cyan-700 shadow-sm backdrop-blur-xl">
+            <span className="h-2 w-2 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500" />
             Vendor Dashboard
-          </p>
+          </div>
 
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+          <h1 className="text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
             Edit Product
           </h1>
 
-          <p className="mt-2 text-sm text-gray-500 sm:text-base">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
             Update your product information, images,
             inventory and variants.
           </p>
@@ -328,8 +320,11 @@ const EditProduct = () => {
 
         {/* ERROR */}
         {error && (
-          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-            {error}
+          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200/80 bg-red-50/80 px-4 py-4 text-sm font-medium text-red-600 shadow-sm backdrop-blur-xl">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100 font-bold">
+              !
+            </span>
+            <span>{error}</span>
           </div>
         )}
 
@@ -339,23 +334,30 @@ const EditProduct = () => {
         >
 
           {/* PRODUCT INFORMATION */}
-          <section className="rounded-3xl border border-white/80 bg-white/75 p-5 shadow-sm backdrop-blur-xl sm:p-7">
+          <section className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/75 p-5 shadow-lg shadow-slate-200/40 backdrop-blur-xl sm:p-7">
+            <div className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-teal-300/10 blur-3xl" />
 
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">
+            <div className="relative mb-7">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500" />
+                <span className="text-xs font-bold uppercase tracking-[0.18em] text-teal-600">
+                  Product Details
+                </span>
+              </div>
+
+              <h2 className="text-2xl font-black tracking-tight text-slate-950">
                 Product Information
               </h2>
 
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-2 text-sm leading-6 text-slate-500">
                 Update the basic details of your product.
               </p>
             </div>
 
-            <div className="space-y-5">
+            <div className="relative space-y-5">
 
-              {/* NAME */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
+                <label className="mb-2.5 block text-sm font-bold text-slate-700">
                   Product Name
                 </label>
 
@@ -364,14 +366,13 @@ const EditProduct = () => {
                   placeholder="Product Name"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                  className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-3.5 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100/70"
                   required
                 />
               </div>
 
-              {/* DESCRIPTION */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
+                <label className="mb-2.5 block text-sm font-bold text-slate-700">
                   Product Description
                 </label>
 
@@ -381,21 +382,20 @@ const EditProduct = () => {
                   value={form.description}
                   onChange={handleChange}
                   rows="5"
-                  className="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                  className="w-full resize-none rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-3.5 text-sm font-medium leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100/70"
                   required
                 />
               </div>
 
-              {/* PRICE + STOCK */}
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                  <label className="mb-2.5 block text-sm font-bold text-slate-700">
                     Price
                   </label>
 
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-teal-600">
                       ₹
                     </span>
 
@@ -406,14 +406,14 @@ const EditProduct = () => {
                       placeholder="0"
                       value={form.price}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-9 pr-4 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                      className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/70 py-3.5 pl-9 pr-4 text-sm font-medium text-slate-900 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100/70"
                       required
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                  <label className="mb-2.5 block text-sm font-bold text-slate-700">
                     Stock
                   </label>
 
@@ -424,7 +424,7 @@ const EditProduct = () => {
                     placeholder="0"
                     value={form.stock}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                    className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-3.5 text-sm font-medium text-slate-900 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100/70"
                     required
                   />
                 </div>
@@ -434,20 +434,28 @@ const EditProduct = () => {
           </section>
 
           {/* IMAGES */}
-          <section className="rounded-3xl border border-white/80 bg-white/75 p-5 shadow-sm backdrop-blur-xl sm:p-7">
+          <section className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/75 p-5 shadow-lg shadow-slate-200/40 backdrop-blur-xl sm:p-7">
+            <div className="pointer-events-none absolute -left-20 -top-20 h-52 w-52 rounded-full bg-cyan-300/10 blur-3xl" />
 
-            <div className="mb-6 flex items-center justify-between">
+            <div className="relative mb-7 flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500" />
+                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-600">
+                    Visuals
+                  </span>
+                </div>
+
+                <h2 className="text-2xl font-black tracking-tight text-slate-950">
                   Product Images
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-slate-500">
                   Manage your product images.
                 </p>
               </div>
 
-              <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
+              <span className="shrink-0 rounded-full border border-teal-200/70 bg-teal-50/80 px-3 py-1.5 text-xs font-bold text-teal-700">
                 {existingImages.length + newImages.length}/5
               </span>
             </div>
@@ -472,17 +480,17 @@ const EditProduct = () => {
                   onClick={() =>
                     fileInputRef.current?.click()
                   }
-                  className="flex aspect-square flex-col items-center justify-center rounded-2xl border-2 border-dashed border-teal-200 bg-teal-50/40 p-4 transition hover:border-teal-400 hover:bg-teal-50"
+                  className="group flex aspect-square flex-col items-center justify-center rounded-3xl border-2 border-dashed border-teal-200/80 bg-gradient-to-br from-teal-50/70 to-cyan-50/40 p-4 transition duration-300 hover:-translate-y-1 hover:border-teal-400 hover:bg-teal-50 hover:shadow-lg hover:shadow-teal-100/70"
                 >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-2xl text-teal-600 shadow-sm">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-500 text-2xl font-light text-white shadow-md shadow-teal-200/60 transition group-hover:scale-105">
                     +
                   </div>
 
-                  <span className="mt-3 text-xs font-semibold text-gray-700">
+                  <span className="mt-3 text-xs font-bold text-slate-700">
                     Add Image
                   </span>
 
-                  <span className="mt-1 text-[11px] text-gray-400">
+                  <span className="mt-1 text-[11px] font-medium text-slate-400">
                     JPG / PNG
                   </span>
                 </button>
@@ -493,16 +501,16 @@ const EditProduct = () => {
                 (image, index) => (
                   <div
                     key={image}
-                    className="group relative aspect-square overflow-hidden rounded-2xl border border-gray-200 bg-gray-100"
+                    className="group relative aspect-square overflow-hidden rounded-3xl border border-white/80 bg-slate-100 shadow-md"
                   >
                     <img
                       src={image}
                       alt={`Product ${index + 1}`}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
 
                     {index === 0 && (
-                      <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-teal-700 shadow-sm backdrop-blur">
+                      <span className="absolute left-2.5 top-2.5 rounded-full border border-white/50 bg-white/90 px-2.5 py-1 text-[10px] font-bold text-teal-700 shadow-sm backdrop-blur">
                         Main Image
                       </span>
                     )}
@@ -512,7 +520,7 @@ const EditProduct = () => {
                       onClick={() =>
                         removeExistingImage(index)
                       }
-                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-lg text-white transition hover:bg-red-500"
+                      className="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full border border-white/30 bg-black/50 text-lg text-white shadow-md backdrop-blur-md transition hover:scale-105 hover:bg-red-500"
                     >
                       ×
                     </button>
@@ -525,15 +533,15 @@ const EditProduct = () => {
                 (image, index) => (
                   <div
                     key={`${image.file.name}-${index}`}
-                    className="group relative aspect-square overflow-hidden rounded-2xl border border-teal-200 bg-gray-100"
+                    className="group relative aspect-square overflow-hidden rounded-3xl border border-teal-200 bg-slate-100 shadow-md"
                   >
                     <img
                       src={image.preview}
                       alt={`New product ${index + 1}`}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
 
-                    <span className="absolute left-2 top-2 rounded-full bg-teal-600 px-2.5 py-1 text-[10px] font-semibold text-white">
+                    <span className="absolute left-2.5 top-2.5 rounded-full bg-gradient-to-r from-teal-600 to-cyan-600 px-2.5 py-1 text-[10px] font-bold text-white shadow-md">
                       New
                     </span>
 
@@ -542,7 +550,7 @@ const EditProduct = () => {
                       onClick={() =>
                         removeNewImage(index)
                       }
-                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-lg text-white transition hover:bg-red-500"
+                      className="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full border border-white/30 bg-black/50 text-lg text-white shadow-md backdrop-blur-md transition hover:scale-105 hover:bg-red-500"
                     >
                       ×
                     </button>
@@ -552,23 +560,31 @@ const EditProduct = () => {
 
             </div>
 
-            <p className="mt-4 text-xs leading-5 text-gray-400">
+            <p className="mt-4 text-xs font-medium leading-5 text-slate-400">
               You can keep your existing images or replace them
               with newly uploaded images. Maximum 5 images.
             </p>
           </section>
 
           {/* VARIANTS */}
-          <section className="rounded-3xl border border-white/80 bg-white/75 p-5 shadow-sm backdrop-blur-xl sm:p-7">
+          <section className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/75 p-5 shadow-lg shadow-slate-200/40 backdrop-blur-xl sm:p-7">
+            <div className="pointer-events-none absolute -right-20 -bottom-20 h-56 w-56 rounded-full bg-blue-300/10 blur-3xl" />
 
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500" />
+                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
+                    Options
+                  </span>
+                </div>
+
+                <h2 className="text-2xl font-black tracking-tight text-slate-950">
                   Product Variants
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-slate-500">
                   Update sizes, colors or other variations.
                 </p>
               </div>
@@ -576,33 +592,37 @@ const EditProduct = () => {
               <button
                 type="button"
                 onClick={addVariant}
-                className="rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700"
+                className="rounded-2xl bg-gradient-to-r from-teal-600 to-cyan-600 px-5 py-3 text-sm font-bold text-white shadow-md shadow-cyan-200/50 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-200/70"
               >
                 + Add Variant
               </button>
             </div>
 
             {variants.length === 0 ? (
-              <div className="mt-6 rounded-2xl border border-dashed border-gray-200 bg-gray-50/70 px-5 py-8 text-center">
-                <p className="text-sm font-medium text-gray-600">
+              <div className="relative mt-6 rounded-3xl border border-dashed border-slate-200 bg-slate-50/70 px-5 py-9 text-center">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-xl text-slate-300 shadow-sm">
+                  +
+                </div>
+
+                <p className="mt-3 text-sm font-bold text-slate-600">
                   No variants added
                 </p>
 
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs font-medium text-slate-400">
                   Variants are optional.
                 </p>
               </div>
             ) : (
-              <div className="mt-6 space-y-4">
+              <div className="relative mt-6 space-y-4">
 
                 {variants.map(
                   (variant, index) => (
                     <div
                       key={index}
-                      className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5"
+                      className="rounded-3xl border border-white/90 bg-gradient-to-br from-white/90 to-slate-50/60 p-4 shadow-sm sm:p-5"
                     >
                       <div className="mb-4 flex items-center justify-between">
-                        <span className="text-sm font-semibold text-gray-800">
+                        <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
                           Variant {index + 1}
                         </span>
 
@@ -611,7 +631,7 @@ const EditProduct = () => {
                           onClick={() =>
                             removeVariant(index)
                           }
-                          className="text-xs font-semibold text-red-500 transition hover:text-red-600"
+                          className="text-xs font-bold text-red-500 transition hover:text-red-600"
                         >
                           Remove
                         </button>
@@ -619,9 +639,8 @@ const EditProduct = () => {
 
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 
-                        {/* NAME */}
                         <div>
-                          <label className="mb-2 block text-xs font-medium text-gray-600">
+                          <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">
                             Variant Name
                           </label>
 
@@ -636,13 +655,12 @@ const EditProduct = () => {
                               )
                             }
                             placeholder="e.g. Medium"
-                            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-100"
+                            className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100/70"
                           />
                         </div>
 
-                        {/* PRICE */}
                         <div>
-                          <label className="mb-2 block text-xs font-medium text-gray-600">
+                          <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">
                             Price
                           </label>
 
@@ -658,13 +676,12 @@ const EditProduct = () => {
                               )
                             }
                             placeholder="₹ 0"
-                            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-100"
+                            className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100/70"
                           />
                         </div>
 
-                        {/* STOCK */}
                         <div>
-                          <label className="mb-2 block text-xs font-medium text-gray-600">
+                          <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">
                             Stock
                           </label>
 
@@ -680,7 +697,7 @@ const EditProduct = () => {
                               )
                             }
                             placeholder="0"
-                            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-100"
+                            className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100/70"
                           />
                         </div>
 
@@ -702,7 +719,7 @@ const EditProduct = () => {
                 navigate("/vendor/products")
               }
               disabled={saving}
-              className="rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+              className="rounded-2xl border border-slate-200 bg-white/80 px-6 py-3.5 text-sm font-bold text-slate-600 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-md disabled:opacity-50"
             >
               Cancel
             </button>
@@ -710,7 +727,7 @@ const EditProduct = () => {
             <button
               type="submit"
               disabled={saving}
-              className="rounded-xl bg-teal-600 px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-2xl bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-cyan-200/60 transition duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-cyan-200/80 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving
                 ? "Saving..."

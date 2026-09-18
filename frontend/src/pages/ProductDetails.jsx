@@ -14,12 +14,18 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState(null);
 
+  // Active product image
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const response = await api.get(`/products/${productId}`);
 
         setProduct(response.data.product);
+
+        // Always start with the first image
+        setActiveImageIndex(0);
       } catch (error) {
         console.error(error);
       } finally {
@@ -46,6 +52,34 @@ const ProductDetails = () => {
         store: product.store,
       })
     );
+  };
+
+  // =========================================================
+  // IMAGE CAROUSEL
+  // =========================================================
+
+  const images = Array.isArray(product?.images)
+    ? product.images
+    : [];
+
+  const nextImage = () => {
+    if (images.length <= 1) return;
+
+    setActiveImageIndex((prevIndex) =>
+      prevIndex === images.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const previousImage = () => {
+    if (images.length <= 1) return;
+
+    setActiveImageIndex((prevIndex) =>
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+    );
+  };
+
+  const selectImage = (index) => {
+    setActiveImageIndex(index);
   };
 
   if (loading) {
@@ -103,17 +137,15 @@ const ProductDetails = () => {
     );
   }
 
-  const image =
-    Array.isArray(product.images) && product.images.length > 0
-      ? product.images[0]
-      : null;
-
   const currentPrice = selectedVariant?.price || product.price;
 
   const currentStock =
     selectedVariant !== null ? selectedVariant.stock : product.stock;
 
   const isOutOfStock = currentStock <= 0;
+
+  const currentImage =
+    images.length > 0 ? images[activeImageIndex] : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-cyan-50/30 to-teal-50/50 px-4 py-6 sm:px-6 lg:px-8">
@@ -139,12 +171,18 @@ const ProductDetails = () => {
         {/* Product Card */}
         <section className="overflow-hidden rounded-3xl border border-white/80 bg-white/80 p-4 shadow-xl shadow-slate-200/50 backdrop-blur-xl sm:p-6 lg:p-8">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-            {/* Product Image */}
+
+            {/* =================================================
+                PRODUCT IMAGE + CAROUSEL
+            ================================================== */}
+
             <div>
               <div className="group relative aspect-square overflow-hidden rounded-3xl border border-slate-200/70 bg-gradient-to-br from-slate-100 via-cyan-50 to-teal-50">
-                {image ? (
+
+                {currentImage ? (
                   <img
-                    src={image}
+                    key={currentImage}
+                    src={currentImage}
                     alt={product.name}
                     className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                   />
@@ -156,6 +194,36 @@ const ProductDetails = () => {
 
                 {/* Image overlay */}
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent to-white/10" />
+
+                {/* =================================================
+                    PREVIOUS IMAGE BUTTON
+                ================================================== */}
+
+                {images.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={previousImage}
+                    className="absolute left-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/60 bg-slate-900/35 text-xl font-semibold text-white opacity-0 shadow-lg backdrop-blur-md transition duration-300 hover:bg-slate-900/55 group-hover:opacity-100"
+                    aria-label="Previous image"
+                  >
+                    ←
+                  </button>
+                )}
+
+                {/* =================================================
+                    NEXT IMAGE BUTTON
+                ================================================== */}
+
+                {images.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={nextImage}
+                    className="absolute right-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/60 bg-slate-900/35 text-xl font-semibold text-white opacity-0 shadow-lg backdrop-blur-md transition duration-300 hover:bg-slate-900/55 group-hover:opacity-100"
+                    aria-label="Next image"
+                  >
+                    →
+                  </button>
+                )}
 
                 {/* Product badge */}
                 <div className="absolute left-4 top-4">
@@ -182,32 +250,77 @@ const ProductDetails = () => {
                       : "In Stock"}
                   </span>
                 </div>
+
+                {/* =================================================
+                    IMAGE POSITION
+                ================================================== */}
+
+                {images.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-white/40 bg-slate-900/30 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
+                    {activeImageIndex + 1} / {images.length}
+                  </div>
+                )}
               </div>
 
-              {/* Image count */}
-              {product.images?.length > 1 && (
-                <div className="mt-3 flex gap-2">
-                  {product.images.map((img, index) => (
-                    <div
-                      key={index}
-                      className="h-16 w-16 overflow-hidden rounded-xl border border-slate-200 bg-white"
-                    >
-                      <img
-                        src={img}
-                        alt={`${product.name} ${index + 1}`}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  ))}
+              {/* =================================================
+                  IMAGE THUMBNAILS
+              ================================================== */}
+
+              {images.length > 1 && (
+                <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
+                  {images.map((img, index) => {
+                    const isActive = activeImageIndex === index;
+
+                    return (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => selectImage(index)}
+                        className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 bg-white transition duration-200 ${
+                          isActive
+                            ? "border-teal-500 shadow-md shadow-teal-200/60"
+                            : "border-slate-200 hover:border-cyan-300"
+                        }`}
+                        aria-label={`View image ${index + 1}`}
+                      >
+                        <img
+                          src={img}
+                          alt={`${product.name} ${index + 1}`}
+                          className={`h-full w-full object-cover transition duration-300 ${
+                            isActive
+                              ? "scale-105"
+                              : "hover:scale-105"
+                          }`}
+                        />
+
+                        {/* Active thumbnail overlay */}
+                        {isActive && (
+                          <div className="absolute inset-0 border-2 border-white/30" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Single image indicator */}
+              {images.length === 1 && (
+                <div className="mt-3 text-center text-xs font-medium text-slate-400">
+                  1 image
                 </div>
               )}
             </div>
 
-            {/* Product Information */}
+            {/* =================================================
+                PRODUCT INFORMATION
+            ================================================== */}
+
             <div className="flex flex-col justify-center">
+
               {/* Small label */}
               <div className="mb-3 flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-teal-500" />
+
                 <span className="text-xs font-bold uppercase tracking-[0.18em] text-teal-600">
                   Product Details
                 </span>
@@ -220,7 +333,7 @@ const ProductDetails = () => {
 
               {/* Price */}
               <div className="mt-5 flex items-end gap-3">
-                <span className="text-4xl font-black text-transparent bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 bg-clip-text sm:text-5xl">
+                <span className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 bg-clip-text text-4xl font-black text-transparent sm:text-5xl">
                   ₹{currentPrice?.toLocaleString("en-IN")}
                 </span>
 
@@ -260,6 +373,7 @@ const ProductDetails = () => {
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {product.variants.map((variant) => {
                       const variantOutOfStock = variant.stock <= 0;
+
                       const isSelected =
                         selectedVariant?._id === variant._id;
 
@@ -314,15 +428,21 @@ const ProductDetails = () => {
               {/* Stock */}
               <div className="mt-6 flex items-center justify-between rounded-2xl border border-slate-100 bg-white px-4 py-3">
                 <span className="text-sm font-medium text-slate-500">
-                  {selectedVariant ? "Selected option stock" : "Available stock"}
+                  {selectedVariant
+                    ? "Selected option stock"
+                    : "Available stock"}
                 </span>
 
                 <span
                   className={`text-sm font-bold ${
-                    isOutOfStock ? "text-red-600" : "text-emerald-600"
+                    isOutOfStock
+                      ? "text-red-600"
+                      : "text-emerald-600"
                   }`}
                 >
-                  {isOutOfStock ? "Unavailable" : `${currentStock} units`}
+                  {isOutOfStock
+                    ? "Unavailable"
+                    : `${currentStock} units`}
                 </span>
               </div>
 
@@ -339,7 +459,10 @@ const ProductDetails = () => {
                   }`}
                 >
                   <span className="text-lg">🛒</span>
-                  {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+
+                  {isOutOfStock
+                    ? "Out of Stock"
+                    : "Add to Cart"}
                 </button>
 
                 <Link
@@ -355,6 +478,7 @@ const ProductDetails = () => {
               <div className="mt-6 grid grid-cols-3 gap-2 border-t border-slate-100 pt-5">
                 <div className="text-center">
                   <div className="text-lg">🔒</div>
+
                   <p className="mt-1 text-[10px] font-semibold text-slate-500">
                     Secure Checkout
                   </p>
@@ -362,6 +486,7 @@ const ProductDetails = () => {
 
                 <div className="border-x border-slate-100 text-center">
                   <div className="text-lg">⚡</div>
+
                   <p className="mt-1 text-[10px] font-semibold text-slate-500">
                     Fast Ordering
                   </p>
@@ -369,6 +494,7 @@ const ProductDetails = () => {
 
                 <div className="text-center">
                   <div className="text-lg">✓</div>
+
                   <p className="mt-1 text-[10px] font-semibold text-slate-500">
                     Verified Store
                   </p>
@@ -400,4 +526,3 @@ const ProductDetails = () => {
 };
 
 export default ProductDetails;
-

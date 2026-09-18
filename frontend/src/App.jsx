@@ -22,6 +22,7 @@ import ManageAddresses from "./pages/customer/ManageAddresses";
 import AccountInformation from "./pages/customer/AccountInformation";
 import AllStores from "./pages/admin/AllStores";
 import VerifyEmailPage from "./pages/verifyEmailPage";
+import CreateStore from "./pages/vendor/CreateStore";
 
 
 const App = () => {
@@ -35,6 +36,7 @@ const App = () => {
         <Route path="/cart" element={<CartPage/>}/>
         <Route path="/checkout" element={<CheckoutPage/>}/>
         <Route path="/order-success" element={<OrderSuccess/>}/>
+        <Route path="/vendor/create-store" element={<CreateStore/>}/>
         <Route path="/vendor/dashboard" element={<VendorDashboard/>}/>
         <Route path={"/vendor/products"} element = {<VendorProducts/>}/>
         <Route path="/vendor/products/new" element = {<AddProduct/>}/>

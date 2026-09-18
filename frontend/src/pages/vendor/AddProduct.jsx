@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
+import VendorHeader from "./VendorHeader";
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -42,7 +43,6 @@ const AddProduct = () => {
 
     setError("");
 
-    // Allows selecting the same image again
     e.target.value = "";
   };
 
@@ -59,7 +59,7 @@ const AddProduct = () => {
   };
 
   // VARIANTS
- 
+
   const addVariant = () => {
     setVariants((current) => [
       ...current,
@@ -112,7 +112,6 @@ const AddProduct = () => {
       return;
     }
 
-    // Validate variants
     for (const variant of variants) {
       if (!variant.name.trim()) {
         setError("Every variant must have a name.");
@@ -140,12 +139,10 @@ const AddProduct = () => {
       data.append("price", Number(form.price));
       data.append("stock", Number(form.stock));
 
-      // Add product images
       images.forEach((image) => {
         data.append("images", image.file);
       });
 
-      // Convert variant values to numbers
       const formattedVariants = variants.map((variant) => ({
         name: variant.name.trim(),
         price: Number(variant.price),
@@ -175,7 +172,13 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-teal-50/30 to-white px-4 py-6 sm:px-6 lg:px-8">
+    <div className="min-h-screen overflow-x-hidden bg-gradient-to-br from-slate-100 via-cyan-50/30 to-teal-50/50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
+      <VendorHeader/>
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute left-1/4 top-0 h-72 w-72 rounded-full bg-teal-300/15 blur-3xl" />
+        <div className="absolute -right-24 top-40 h-80 w-80 rounded-full bg-cyan-300/15 blur-3xl" />
+        <div className="absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-blue-300/10 blur-3xl" />
+      </div>
 
       <div className="mx-auto max-w-4xl">
 
@@ -184,51 +187,58 @@ const AddProduct = () => {
           <button
             type="button"
             onClick={() => navigate("/vendor/products")}
-            className="mb-4 text-sm font-medium text-teal-600 transition hover:text-teal-700"
+            className="mb-5 inline-flex items-center gap-2 rounded-full border border-teal-200/70 bg-white/70 px-4 py-2 text-sm font-bold text-teal-700 shadow-sm backdrop-blur-xl transition hover:-translate-x-0.5 hover:border-teal-300 hover:bg-white"
           >
             ← Back to Products
           </button>
 
-          <p className="text-xs font-semibold uppercase tracking-widest text-teal-600">
-            Vendor Dashboard
-          </p>
-
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+          <h1 className="text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
             Add Product
           </h1>
 
-          <p className="mt-2 text-sm text-gray-500 sm:text-base">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
             Add a product with images, pricing, inventory and variants.
           </p>
         </div>
 
         {/* ERROR */}
         {error && (
-          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-            {error}
+          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200/80 bg-red-50/80 px-4 py-4 text-sm font-medium text-red-600 shadow-sm backdrop-blur-xl">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100 font-bold">
+              !
+            </span>
+            <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
 
           {/* PRODUCT INFORMATION */}
-          <section className="rounded-3xl border border-white/80 bg-white/75 p-5 shadow-sm backdrop-blur-xl sm:p-7">
+          <section className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/75 p-5 shadow-lg shadow-slate-200/40 backdrop-blur-xl sm:p-7">
+            <div className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-teal-300/10 blur-3xl" />
 
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">
+            <div className="relative mb-7">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500" />
+                <span className="text-xs font-bold uppercase tracking-[0.18em] text-teal-600">
+                  Product Details
+                </span>
+              </div>
+
+              <h2 className="text-2xl font-black tracking-tight text-slate-950">
                 Product Information
               </h2>
 
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-2 text-sm leading-6 text-slate-500">
                 Enter the basic information for your product.
               </p>
             </div>
 
-            <div className="space-y-5">
+            <div className="relative space-y-5">
 
               {/* NAME */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
+                <label className="mb-2.5 block text-sm font-bold text-slate-700">
                   Product Name
                 </label>
 
@@ -237,14 +247,14 @@ const AddProduct = () => {
                   placeholder="e.g. Premium Cotton Shirt"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                  className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-3.5 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100/70"
                   required
                 />
               </div>
 
               {/* DESCRIPTION */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
+                <label className="mb-2.5 block text-sm font-bold text-slate-700">
                   Product Description
                 </label>
 
@@ -254,7 +264,7 @@ const AddProduct = () => {
                   value={form.description}
                   onChange={handleChange}
                   rows="5"
-                  className="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                  className="w-full resize-none rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-3.5 text-sm font-medium leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100/70"
                   required
                 />
               </div>
@@ -263,12 +273,12 @@ const AddProduct = () => {
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                  <label className="mb-2.5 block text-sm font-bold text-slate-700">
                     Price
                   </label>
 
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-teal-600">
                       ₹
                     </span>
 
@@ -279,14 +289,14 @@ const AddProduct = () => {
                       placeholder="0"
                       value={form.price}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-9 pr-4 text-sm outline-none transition placeholder:text-gray-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                      className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/70 py-3.5 pl-9 pr-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100/70"
                       required
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                  <label className="mb-2.5 block text-sm font-bold text-slate-700">
                     Stock
                   </label>
 
@@ -297,7 +307,7 @@ const AddProduct = () => {
                     placeholder="0"
                     value={form.stock}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                    className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-3.5 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100/70"
                     required
                   />
                 </div>
@@ -307,20 +317,28 @@ const AddProduct = () => {
           </section>
 
           {/* IMAGES */}
-          <section className="rounded-3xl border border-white/80 bg-white/75 p-5 shadow-sm backdrop-blur-xl sm:p-7">
+          <section className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/75 p-5 shadow-lg shadow-slate-200/40 backdrop-blur-xl sm:p-7">
+            <div className="pointer-events-none absolute -left-20 -top-20 h-52 w-52 rounded-full bg-cyan-300/10 blur-3xl" />
 
-            <div className="mb-6 flex items-center justify-between">
+            <div className="relative mb-7 flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500" />
+                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-600">
+                    Visuals
+                  </span>
+                </div>
+
+                <h2 className="text-2xl font-black tracking-tight text-slate-950">
                   Product Images
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-slate-500">
                   Upload up to 5 images.
                 </p>
               </div>
 
-              <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
+              <span className="shrink-0 rounded-full border border-teal-200/70 bg-teal-50/80 px-3 py-1.5 text-xs font-bold text-teal-700">
                 {images.length}/5
               </span>
             </div>
@@ -341,17 +359,17 @@ const AddProduct = () => {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex aspect-square flex-col items-center justify-center rounded-2xl border-2 border-dashed border-teal-200 bg-teal-50/40 p-4 transition hover:border-teal-400 hover:bg-teal-50"
+                  className="group flex aspect-square flex-col items-center justify-center rounded-3xl border-2 border-dashed border-teal-200/80 bg-gradient-to-br from-teal-50/70 to-cyan-50/40 p-4 transition duration-300 hover:-translate-y-1 hover:border-teal-400 hover:bg-teal-50 hover:shadow-lg hover:shadow-teal-100/70"
                 >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-2xl text-teal-600 shadow-sm">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-500 text-2xl font-light text-white shadow-md shadow-teal-200/60 transition group-hover:scale-105">
                     +
                   </div>
 
-                  <span className="mt-3 text-xs font-semibold text-gray-700">
+                  <span className="mt-3 text-xs font-bold text-slate-700">
                     Add Image
                   </span>
 
-                  <span className="mt-1 text-[11px] text-gray-400">
+                  <span className="mt-1 text-[11px] font-medium text-slate-400">
                     JPG / PNG
                   </span>
                 </button>
@@ -361,26 +379,24 @@ const AddProduct = () => {
               {images.map((image, index) => (
                 <div
                   key={`${image.file.name}-${index}`}
-                  className="group relative aspect-square overflow-hidden rounded-2xl border border-gray-200 bg-gray-100"
+                  className="group relative aspect-square overflow-hidden rounded-3xl border border-white/80 bg-slate-100 shadow-md"
                 >
                   <img
                     src={image.preview}
                     alt={`Product preview ${index + 1}`}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                   />
 
-                  {/* MAIN IMAGE */}
                   {index === 0 && (
-                    <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-teal-700 shadow-sm backdrop-blur">
+                    <span className="absolute left-2.5 top-2.5 rounded-full border border-white/50 bg-white/90 px-2.5 py-1 text-[10px] font-bold text-teal-700 shadow-sm backdrop-blur">
                       Main Image
                     </span>
                   )}
 
-                  {/* REMOVE */}
                   <button
                     type="button"
                     onClick={() => removeImage(index)}
-                    className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-lg text-white transition hover:bg-red-500"
+                    className="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full border border-white/30 bg-black/50 text-lg text-white shadow-md backdrop-blur-md transition hover:scale-105 hover:bg-red-500"
                   >
                     ×
                   </button>
@@ -389,23 +405,31 @@ const AddProduct = () => {
             </div>
 
             {images.length === 0 && (
-              <p className="mt-4 text-xs text-gray-400">
+              <p className="mt-4 text-xs font-medium text-slate-400">
                 The first image will be used as the main product image.
               </p>
             )}
           </section>
 
           {/* VARIANTS */}
-          <section className="rounded-3xl border border-white/80 bg-white/75 p-5 shadow-sm backdrop-blur-xl sm:p-7">
+          <section className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/75 p-5 shadow-lg shadow-slate-200/40 backdrop-blur-xl sm:p-7">
+            <div className="pointer-events-none absolute -right-20 -bottom-20 h-56 w-56 rounded-full bg-blue-300/10 blur-3xl" />
 
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500" />
+                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
+                    Options
+                  </span>
+                </div>
+
+                <h2 className="text-2xl font-black tracking-tight text-slate-950">
                   Product Variants
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-slate-500">
                   Add sizes, colors or other product variations.
                 </p>
               </div>
@@ -413,40 +437,43 @@ const AddProduct = () => {
               <button
                 type="button"
                 onClick={addVariant}
-                className="rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700"
+                className="rounded-2xl bg-gradient-to-r from-teal-600 to-cyan-600 px-5 py-3 text-sm font-bold text-white shadow-md shadow-cyan-200/50 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-200/70"
               >
                 + Add Variant
               </button>
             </div>
 
             {variants.length === 0 ? (
-              <div className="mt-6 rounded-2xl border border-dashed border-gray-200 bg-gray-50/70 px-5 py-8 text-center">
-                <p className="text-sm font-medium text-gray-600">
+              <div className="relative mt-6 rounded-3xl border border-dashed border-slate-200 bg-slate-50/70 px-5 py-9 text-center">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-xl text-slate-300 shadow-sm">
+                  +
+                </div>
+
+                <p className="mt-3 text-sm font-bold text-slate-600">
                   No variants added
                 </p>
 
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs font-medium text-slate-400">
                   Variants are optional.
                 </p>
               </div>
             ) : (
-              <div className="mt-6 space-y-4">
+              <div className="relative mt-6 space-y-4">
 
                 {variants.map((variant, index) => (
                   <div
                     key={index}
-                    className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5"
+                    className="rounded-3xl border border-white/90 bg-gradient-to-br from-white/90 to-slate-50/60 p-4 shadow-sm sm:p-5"
                   >
-
                     <div className="mb-4 flex items-center justify-between">
-                      <span className="text-sm font-semibold text-gray-800">
+                      <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
                         Variant {index + 1}
                       </span>
 
                       <button
                         type="button"
                         onClick={() => removeVariant(index)}
-                        className="text-xs font-semibold text-red-500 transition hover:text-red-600"
+                        className="text-xs font-bold text-red-500 transition hover:text-red-600"
                       >
                         Remove
                       </button>
@@ -454,9 +481,8 @@ const AddProduct = () => {
 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 
-                      {/* VARIANT NAME */}
                       <div>
-                        <label className="mb-2 block text-xs font-medium text-gray-600">
+                        <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">
                           Variant Name
                         </label>
 
@@ -471,13 +497,12 @@ const AddProduct = () => {
                             )
                           }
                           placeholder="e.g. Medium"
-                          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-100"
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100/70"
                         />
                       </div>
 
-                      {/* VARIANT PRICE */}
                       <div>
-                        <label className="mb-2 block text-xs font-medium text-gray-600">
+                        <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">
                           Price
                         </label>
 
@@ -493,13 +518,12 @@ const AddProduct = () => {
                             )
                           }
                           placeholder="₹ 0"
-                          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-100"
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100/70"
                         />
                       </div>
 
-                      {/* VARIANT STOCK */}
                       <div>
-                        <label className="mb-2 block text-xs font-medium text-gray-600">
+                        <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">
                           Stock
                         </label>
 
@@ -515,7 +539,7 @@ const AddProduct = () => {
                             )
                           }
                           placeholder="0"
-                          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-100"
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100/70"
                         />
                       </div>
 
@@ -534,7 +558,7 @@ const AddProduct = () => {
               type="button"
               onClick={() => navigate("/vendor/products")}
               disabled={loading}
-              className="rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+              className="rounded-2xl border border-slate-200 bg-white/80 px-6 py-3.5 text-sm font-bold text-slate-600 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-md disabled:opacity-50"
             >
               Cancel
             </button>
@@ -542,7 +566,7 @@ const AddProduct = () => {
             <button
               type="submit"
               disabled={loading}
-              className="rounded-xl bg-teal-600 px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-2xl bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-cyan-200/60 transition duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-cyan-200/80 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? "Creating..." : "Create Product"}
             </button>
