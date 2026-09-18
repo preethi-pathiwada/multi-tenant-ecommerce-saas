@@ -16,15 +16,15 @@ const app = express();
 
 app.use(helmet());
 
-// const allowedOrigins = [
-//   "http://localhost:5173",
-//   "https://multi-tenant-ecommerce-saas-694d03os1-npte.vercel.app",
-//   "https://multi-tenant-ecommerce-saas-xi.vercel.app",
-// ];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://6aad8d8e0d26a5708cd4a38f--orbikart.netlify.app",
+];
 
 app.use(
   cors({
-    origin: "*",
+    origin: allowedOrigins,
+    credentials: true,
   })
 );
 
